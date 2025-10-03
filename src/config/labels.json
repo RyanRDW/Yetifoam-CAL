@@ -1,0 +1,30 @@
+{
+  "sections": {
+    "Location": "Location",
+    "Dimensions": "Shed Dimensions",
+    "Pitch": "Roof Pitch",
+    "Cladding": "Cladding Type",
+    "Members": "Structural Members",
+    "SprayOptions": "Spray Coverage Options",
+    "Openings": "Openings"
+  },
+  "fields": {
+    "suburb": "Suburb",
+    "length": "Length (m)",
+    "width": "Width (m)",
+    "wall_height": "Wall Height (m)",
+    "roof_battens": "Include Roof Battens",
+    "wall_purlins": "Include Wall Purlins"
+  },
+  "buttons": {
+    "calculate": "Calculate Spray Area",
+    "recalculate": "Re-Calculate",
+    "save_quote": "Save Quote",
+    "export_pdf": "Export PDF",
+    "email_client": "Email Client",
+    "edit_inputs": "Edit Inputs",
+    "manage_openings": "Manage Openings...",
+    "save_notes": "Save Notes",
+    "new_quote": "New Quote"
+  }
+}
