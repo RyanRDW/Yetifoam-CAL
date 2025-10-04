@@ -33,11 +33,62 @@ export type WeatherState = {
 export type AdvisorState = {
   history: ChatMessage[];
 };
+export type CalculationMode = 'input' | 'calculating' | 'results';
+export type ResultStatus = 'idle' | 'pending' | 'ready' | 'error';
+export type OpeningDetail = {
+  id: string;
+  label: string;
+  quantity: number;
+  area: number;
+};
+export type CalculationBreakdown = {
+  roofBase: number;
+  sideWalls: number;
+  gableRectangles: number;
+  gableTriangles: number;
+  pitchFactor: number;
+  claddingFactor: number;
+  surfacesSubtotal: number;
+  openingsDeducted: number;
+  openingDetails: OpeningDetail[];
+  roofBattens: number | null;
+  wallPurlins: number | null;
+  membersTotal: number;
+  netTotal: number;
+};
+export type CalculationResult = {
+  jobId: string;
+  calculatedAt: string;
+  location: {
+    suburb: string | null;
+    wind?: {
+      fastestRecorded: { speed: number | null; year: number | null } | null;
+      averageLastYear: { speed: number | null; year: number | null } | null;
+      sourceSuburb: string | null;
+    } | null;
+  };
+  configuration: {
+    dimensions: string;
+    pitchLabel: string;
+    assumed: boolean;
+    rafterLength: number | null;
+    cladding: string | null;
+    members: string;
+  };
+  breakdown: CalculationBreakdown | null;
+};
+export type ResultsState = {
+  status: ResultStatus;
+  lastResult: CalculationResult | null;
+  error: string | null;
+};
 export type AppState = {
   sections: SectionState;
   panelSizes: PanelSizes;
   weather: WeatherState;
   advisor: AdvisorState;
+  mode: CalculationMode;
+  results: ResultsState;
   form: FormState;
 };
 
@@ -62,9 +113,15 @@ const baseLayout: AppState = {
     SprayOptions: 'expanded',
     Openings: 'collapsed',
   },
-  panelSizes: { rightStack: [70, 10, 10, 10], inputWidthPct: 40 },
+  panelSizes: { rightStack: [65, 35], inputWidthPct: 40 },
   weather: { suburb: '', lastResult: null, fact: null, lastUpdated: null },
   advisor: { history: [] },
+  mode: 'input',
+  results: {
+    status: 'idle',
+    lastResult: null,
+    error: null,
+  },
   form: { ...defaultFormValues },
 };
 
@@ -73,6 +130,12 @@ const defaultLayoutState: AppState = {
   panelSizes: { inputWidthPct: baseLayout.panelSizes.inputWidthPct, rightStack: [...baseLayout.panelSizes.rightStack] },
   weather: { ...baseLayout.weather },
   advisor: { history: [...baseLayout.advisor.history] },
+  mode: baseLayout.mode,
+  results: {
+    status: baseLayout.results.status,
+    lastResult: baseLayout.results.lastResult,
+    error: baseLayout.results.error,
+  },
   form: { ...baseLayout.form },
 };
 
@@ -143,7 +206,13 @@ function ensurePanelSizes(value: unknown): PanelSizes {
     Array.isArray(candidate.rightStack) &&
     candidate.rightStack.every((entry) => typeof entry === 'number' && Number.isFinite(entry))
   ) {
-    panelSizes.rightStack = [...candidate.rightStack];
+    const [first = baseLayout.panelSizes.rightStack[0], second = baseLayout.panelSizes.rightStack[1]] = candidate.rightStack;
+    panelSizes.rightStack = [first, second];
+  }
+
+  const total = panelSizes.rightStack.reduce((sum, entry) => sum + entry, 0);
+  if (total > 0 && total !== 100) {
+    panelSizes.rightStack = panelSizes.rightStack.map((entry) => (entry / total) * 100);
   }
 
   return panelSizes;
@@ -199,6 +268,25 @@ function ensureAdvisorState(value: unknown): AdvisorState {
   return advisor;
 }
 
+function ensureResultsState(value: unknown): ResultsState {
+  if (!value || typeof value !== 'object') {
+    return { ...baseLayout.results };
+  }
+
+  const record = value as Partial<ResultsState>;
+  const status: ResultStatus = record.status === 'pending' || record.status === 'ready' || record.status === 'error'
+    ? record.status
+    : 'idle';
+  const lastResult = record.lastResult ?? null;
+  const error = typeof record.error === 'string' ? record.error : null;
+
+  return {
+    status,
+    lastResult,
+    error,
+  };
+}
+
 function ensureAppState(value: unknown): AppState {
   if (!value || typeof value !== 'object') {
     return {
@@ -216,6 +304,8 @@ function ensureAppState(value: unknown): AppState {
     panelSizes: ensurePanelSizes(candidate.panelSizes),
     weather: ensureWeatherState(candidate.weather),
     advisor: ensureAdvisorState(candidate.advisor),
+    mode: candidate.mode === 'calculating' || candidate.mode === 'results' ? candidate.mode : 'input',
+    results: ensureResultsState(candidate.results),
     form: ensureFormState(candidate.form),
   };
 }
@@ -225,7 +315,9 @@ export type Action =
   | { type: 'SET_PANELS'; payload: PanelSizes }
   | { type: 'SET_WEATHER'; payload: WeatherState }
   | { type: 'SET_ADVISOR'; payload: AdvisorState }
-  | { type: 'SET_FORM'; payload: FormState };
+  | { type: 'SET_FORM'; payload: FormState }
+  | { type: 'SET_MODE'; payload: CalculationMode }
+  | { type: 'SET_RESULTS'; payload: ResultsState };
 
 function reduce(state: AppState, action: Action): AppState {
   switch (action.type) {
@@ -243,6 +335,10 @@ function reduce(state: AppState, action: Action): AppState {
       }
       return { ...state, form: action.payload };
     }
+    case 'SET_MODE':
+      return { ...state, mode: action.payload };
+    case 'SET_RESULTS':
+      return { ...state, results: action.payload };
     default:
       return state;
   }
