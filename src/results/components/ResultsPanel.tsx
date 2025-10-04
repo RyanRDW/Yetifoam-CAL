@@ -5,6 +5,7 @@ import { formatDate } from '../utils/format';
 import { BreakdownTable } from './BreakdownTable';
 import { ConfigSummary } from './ConfigSummary';
 import { Toolbar } from './Toolbar';
+import { TotalsSummary } from './TotalsSummary';
 import { WindSnapshot } from './WindSnapshot';
 
 export function ResultsPanel() {
@@ -67,6 +68,7 @@ export function ResultsPanel() {
             <ConfigSummary configuration={lastResult.configuration} />
             <WindSnapshot wind={lastResult.location.wind} />
           </div>
+          <TotalsSummary breakdown={lastResult.breakdown} />
           <BreakdownTable breakdown={lastResult.breakdown} />
         </div>
       ) : results.status !== 'pending' ? (

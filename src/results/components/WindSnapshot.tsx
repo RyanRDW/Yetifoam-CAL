@@ -10,7 +10,7 @@ export function WindSnapshot({ wind }: Props) {
     return (
       <section className="rounded-xl border border-dashed border-slate-200 bg-white/50 p-4 text-sm text-slate-500">
         <header className="mb-2 text-sm font-semibold text-slate-600">Wind snapshot</header>
-        <p>No wind data captured yet. Fetch weather data before calculating to populate this section.</p>
+        <p>Wind data unavailable. Run a weather lookup before calculating to populate this section.</p>
       </section>
     );
   }
