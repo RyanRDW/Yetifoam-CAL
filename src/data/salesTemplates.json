@@ -1,0 +1,5 @@
+{
+  "intro": "Hey {{name}}, great choice of shed size for {{suburb}}!",
+  "windFact": "Recent wind events in {{suburb}} highlight the need for durable spray foam adhesion.",
+  "closing": "Based on your setup, a {{foam_type}} application will deliver long-term savings and strength."
+}
