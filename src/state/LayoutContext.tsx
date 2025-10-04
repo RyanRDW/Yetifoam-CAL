@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useMemo } from 'react';
 import type { ChatMessage } from '../services/llmClient';
 import { usePersistentState } from '../hooks/usePersistentState';
+import { type FormState, defaultFormValues, ensureFormState, formDraftSchema } from './formSchema';
 
 export type SectionKey =
   | 'Location'
@@ -37,6 +38,7 @@ export type AppState = {
   panelSizes: PanelSizes;
   weather: WeatherState;
   advisor: AdvisorState;
+  form: FormState;
 };
 
 const STORAGE_KEY = 'yf:v1:ui';
@@ -63,6 +65,7 @@ const baseLayout: AppState = {
   panelSizes: { rightStack: [70, 10, 10, 10], inputWidthPct: 40 },
   weather: { suburb: '', lastResult: null, fact: null, lastUpdated: null },
   advisor: { history: [] },
+  form: { ...defaultFormValues },
 };
 
 const defaultLayoutState: AppState = {
@@ -70,6 +73,7 @@ const defaultLayoutState: AppState = {
   panelSizes: { inputWidthPct: baseLayout.panelSizes.inputWidthPct, rightStack: [...baseLayout.panelSizes.rightStack] },
   weather: { ...baseLayout.weather },
   advisor: { history: [...baseLayout.advisor.history] },
+  form: { ...baseLayout.form },
 };
 
 function ensureWeatherPayload(value: unknown): WeatherPayload | null {
@@ -202,6 +206,7 @@ function ensureAppState(value: unknown): AppState {
       panelSizes: ensurePanelSizes(undefined),
       weather: ensureWeatherState(undefined),
       advisor: ensureAdvisorState(undefined),
+      form: ensureFormState(undefined),
     };
   }
 
@@ -211,6 +216,7 @@ function ensureAppState(value: unknown): AppState {
     panelSizes: ensurePanelSizes(candidate.panelSizes),
     weather: ensureWeatherState(candidate.weather),
     advisor: ensureAdvisorState(candidate.advisor),
+    form: ensureFormState(candidate.form),
   };
 }
 
@@ -218,7 +224,8 @@ export type Action =
   | { type: 'SET_SECTIONS'; payload: SectionState }
   | { type: 'SET_PANELS'; payload: PanelSizes }
   | { type: 'SET_WEATHER'; payload: WeatherState }
-  | { type: 'SET_ADVISOR'; payload: AdvisorState };
+  | { type: 'SET_ADVISOR'; payload: AdvisorState }
+  | { type: 'SET_FORM'; payload: FormState };
 
 function reduce(state: AppState, action: Action): AppState {
   switch (action.type) {
@@ -230,14 +237,24 @@ function reduce(state: AppState, action: Action): AppState {
       return { ...state, weather: action.payload };
     case 'SET_ADVISOR':
       return { ...state, advisor: action.payload };
+    case 'SET_FORM': {
+      if (import.meta.env?.MODE !== 'production') {
+        formDraftSchema.parse(action.payload);
+      }
+      return { ...state, form: action.payload };
+    }
     default:
       return state;
   }
 }
 
-const LayoutContext = createContext<{ state: AppState; dispatch: React.Dispatch<Action> } | null>(
-  null,
-);
+type LayoutContextValue = {
+  state: AppState;
+  dispatch: React.Dispatch<Action>;
+  updateForm: (updater: (prev: FormState) => FormState) => void;
+};
+
+const LayoutContext = createContext<LayoutContextValue | null>(null);
 
 export function useLayout() {
   const ctx = useContext(LayoutContext);
@@ -258,6 +275,19 @@ export const LayoutProvider: React.FC<React.PropsWithChildren> = ({ children }) 
     [setLayout],
   );
 
-  const value = useMemo(() => ({ state: layout, dispatch }), [layout, dispatch]);
+  const updateForm = useCallback(
+    (updater: (prev: FormState) => FormState) => {
+      setLayout((current) => {
+        const nextForm = updater(current.form);
+        if (import.meta.env?.MODE !== 'production') {
+          formDraftSchema.parse(nextForm);
+        }
+        return reduce(current, { type: 'SET_FORM', payload: nextForm });
+      });
+    },
+    [setLayout],
+  );
+
+  const value = useMemo(() => ({ state: layout, dispatch, updateForm }), [layout, dispatch, updateForm]);
   return <LayoutContext.Provider value={value}>{children}</LayoutContext.Provider>;
 };
