@@ -10,13 +10,13 @@
 - Weather lookup flow is wired end-to-end (`src/components/WeatherPanel.tsx` → `server/api/bom.ts` → `vendor/weather-au`), returning status-aware payloads with graceful error handling.
 - AI Advisor chat panel renders conversation history and calls `/api/llm`; request pipeline is guarded by rate limiting middleware and expects a valid OpenAI key.
 - Phase 1 inputs are complete: `src/components/inputs/*` implements suburb autocomplete, validated dimensions, pitch/cladding/member selectors, spray options, openings modal, and a calculate button gated by `isFormValid`. Form state persists via LayoutContext under `localStorage` key `yf:v1:ui`.
-- Results/sales panels are still placeholder shells; calculation engine and results choreography will arrive in Phase 2/3.
+- Phase 3 results experience is live: `src/results/CalculationController.tsx` orchestrates the 800 ms calculate animation, `ResultsPanel` surfaces configuration, wind snapshot, and spray breakdown totals, and `LivePreview` mirrors input state in real time while respecting persisted layout proportions.
 - No automated tests exist; `npm run test` remains a Vitest hook ready for future suites.
 
 ## Next Development Tasks
-- Phase 2 calculations: run the Calculation Engine Agent with prompt `ImplementPhase2CalculationEngine` to translate Section 2 formulas into deterministic services and wire them to state.
-- Phase 3 presentation: run the Results & Insights Agent with prompt `AssemblePhase3ResultsDisplay` to surface computed areas, wind context, and sales notes in the right-hand stack, honoring animation timings.
-- Phase 4+ follow the existing roadmap once calculation outputs are in place.
+- Phase 4 – Sales Insights & LLM Integration: flesh out sales tooling inside the right stack (context buttons, notes persistence, snippet library) and refine advisor prompts per spec Section 8.
+- Phase 5 – Export & Polish: generate PDF/email outputs, add final styling, accessibility, and performance passes once sales tooling stabilises.
+- Investigate automated regression coverage (Vitest) after Phase 4 to lock behaviour ahead of export work.
 - Always hand the updated README back to the Permanent Project Summariser Agent after each phase to refresh permanent memory.
 
 ## Rules for Workflow
@@ -49,11 +49,11 @@
 - Release Ops Agent: prepares production artifacts, verifies environment variables, and oversees deploy readiness.
 
 ## Development Order
-- Phase 0 – Foundation & Architecture: scaffold complete except for mode state machine and animation polish; revisit once inputs/results are ready.
-- Phase 1 – Input Components: next active phase; deliver all user inputs, validation, and completion signals.
-- Phase 2 – Calculation Engine: build deterministic calculators, member counts, and spray area aggregation.
-- Phase 3 – Results Display: render calculation outputs, wind metrics, and CTA panels per layout config.
-- Phase 4 – Sales Insights & LLM Integration: expand advisor tooling with snippet library, notes persistence, and improved prompts.
+- Phase 0 – Foundation & Architecture: complete.
+- Phase 1 – Input Components: complete.
+- Phase 2 – Calculation Engine: complete (Phase 2 deliverables integrated into results pipeline).
+- Phase 3 – Results Display: complete; choreography, panels, and storage persistence align with spec.
+- Phase 4 – Sales Insights & LLM Integration: next active phase (advisor upgrades, notes, snippets).
 - Phase 5 – Export & Polish: generate PDF/email outputs, add final styling, accessibility, and performance passes; optional Phase 6 adds admin tooling later.
 
 ## Sales Data Integration Note
