@@ -5,10 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "dotenv -e .env vite",
+    "server": "dotenv -e .env tsx server/index.ts",
+    "dev:all": "concurrently \"npm:server\" \"npm:dev\"",
     "build": "dotenv -e .env vite build",
     "test": "dotenv -e .env vitest",
-    "server": "dotenv -e .env node server/index.js",
-    "dev:all": "npm-run-all -p dev server"
+    "check": "tsc --noEmit"
   },
   "dependencies": {
     "openai": "^6.1.0",
@@ -22,12 +23,14 @@
     "@types/react": "^19.1.16",
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.4",
+    "concurrently": "^9.2.1",
     "dotenv-cli": "^10.0.0",
     "eslint": "^9.36.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.22",
     "globals": "^16.4.0",
     "npm-run-all": "^4.1.5",
+    "tsx": "^4.20.6",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.45.0",
     "vite": "^7.1.7"

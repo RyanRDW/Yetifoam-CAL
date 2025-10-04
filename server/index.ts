@@ -1,5 +1,5 @@
 import { createServer } from "http";
-import llmHandler from "./api/llm.js";
+import llmHandler from "./api/llm.ts";
 
 const server = createServer(async (req, res) => {
   if (req.url?.startsWith("/api/llm")) return llmHandler(req, res);
