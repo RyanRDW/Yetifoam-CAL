@@ -4,7 +4,7 @@ import { LayoutProvider } from './state/LayoutContext';
 function App() {
   return (
     <LayoutProvider>
-      <div style={{ height: '100vh', width: '100vw', background: '#fff' }}>
+      <div className="h-screen w-screen bg-slate-100">
         <AppShell />
       </div>
     </LayoutProvider>
