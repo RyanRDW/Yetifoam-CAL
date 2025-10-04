@@ -58,3 +58,24 @@
 
 ## Sales Data Integration Note
 - Weather insights enrich resilience conversations but are non-blocking; core sales estimates derive from dimensions, cladding, and member data, so the app must operate even when BOM data is missing—document any manual adjustments and continue with pricing workflows.
+
+<!-- PHASE-4-PLACEHOLDERS -->
+## Phase 4 Placeholders — Validation
+**Status:** PASS
+**Checks:** files present, no BOM key refs, persistence OK, build OK
+
+**Next actions**
+- Run “Sales/LLM Role Architect” interview to author rules and templates.
+- After content, wire composePitch() and Advisor UI.
+
+**Validator JSON**
+```json
+{
+  "phase": "4-placeholders",
+  "pass": true,
+  "errors": [],
+  "warnings": [],
+  "recommendations": []
+}
+```
+
