@@ -24,18 +24,22 @@ export function AiAdvisorPanel() {
       context.push(`Suburb: ${weather.suburb}`);
     }
 
-    const fastest = weather.lastResult?.fastest_recorded;
-    if (fastest?.speed_kmh) {
-      context.push(
-        `Fastest wind: ${fastest.speed_kmh} km/h${fastest.year ? ` (${fastest.year})` : ''}`,
-      );
-    }
-
-    const average = weather.lastResult?.average_last_year;
-    if (average?.speed_kmh) {
-      context.push(
-        `Average winds last year: ${average.speed_kmh} km/h${average.year ? ` (${average.year})` : ''}`,
-      );
+    if (weather.lastResult?.status === 'ok') {
+      const reading = weather.lastResult;
+      if (reading.wind_kph != null) {
+        context.push(`Wind speed: ${reading.wind_kph} km/h`);
+      }
+      if (reading.gust_kph != null) {
+        context.push(`Recent gust: ${reading.gust_kph} km/h`);
+      }
+      if (reading.temp != null) {
+        context.push(`Temperature: ${reading.temp} °C`);
+      }
+      if (reading.humidity != null) {
+        context.push(`Humidity: ${reading.humidity}%`);
+      }
+    } else if (weather.lastResult?.message) {
+      context.push(`Weather lookup note: ${weather.lastResult.message}`);
     }
 
     if (weather.fact) {

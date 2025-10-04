@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "openai": "^6.1.0",
+    "weather-au": "file:vendor/weather-au",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-resizable-panels": "^3.0.6"
