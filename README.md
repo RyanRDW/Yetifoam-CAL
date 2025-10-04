@@ -10,8 +10,11 @@
 - Weather lookup flow is wired end-to-end (`src/components/WeatherPanel.tsx` → `server/api/bom.ts` → `vendor/weather-au`), returning status-aware payloads with graceful error handling.
 - AI Advisor chat panel renders conversation history and calls `/api/llm`; request pipeline is guarded by rate limiting middleware and expects a valid OpenAI key.
 - Phase 1 inputs are complete: `src/components/inputs/*` implements suburb autocomplete, validated dimensions, pitch/cladding/member selectors, spray options, openings modal, and a calculate button gated by `isFormValid`. Form state persists via LayoutContext under `localStorage` key `yf:v1:ui`.
-- Phase 3 results experience is live: `src/results/CalculationController.tsx` orchestrates the 800 ms calculate animation, `ResultsPanel` now renders `ConfigSummary`, `WindSnapshot`, `TotalsSummary`, and `BreakdownTable` with the floating `Toolbar`, and `LivePreview` mirrors input state in real time while respecting persisted layout proportions.
+- Phase 3 results experience is live: `src/results/CalculationController.tsx` orchestrates the 800 ms calculate animation, `ResultsPanel` now renders `ConfigSummary`, `WindSnapshot`, `TotalsSummary`, and `BreakdownTable` with the floating `Toolbar`, and the right-rail Export panel surfaces manual copy text blocks while respecting persisted layout proportions.
 - No automated tests exist; `npm run test` remains a Vitest hook ready for future suites.
+
+## Export (Text-only, No Storage)
+The Export panel renders a summary and an email draft as plain text. Users copy/paste manually. No PDF, clipboard API, or quote saving/localStorage is used.
 
 ## Next Development Tasks
 - Phase 4 – Sales Insights & LLM Integration: flesh out sales tooling inside the right stack (context buttons, notes persistence, snippet library) and refine advisor prompts per spec Section 8.
@@ -78,4 +81,3 @@
   "recommendations": []
 }
 ```
-

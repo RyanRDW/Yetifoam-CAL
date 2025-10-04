@@ -30,9 +30,6 @@ export function ResultsPanel() {
         tone: 'secondary' as const,
         onClick: handleEdit,
       },
-      { id: 'save', label: 'Save quote', tone: 'primary' as const, onClick: () => undefined },
-      { id: 'pdf', label: 'Export PDF', tone: 'secondary' as const, onClick: () => undefined },
-      { id: 'email', label: 'Email client', tone: 'secondary' as const, onClick: () => undefined },
     ];
   }, [dispatch, lastResult]);
 
