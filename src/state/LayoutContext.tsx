@@ -12,9 +12,18 @@ export type SectionKey =
   | 'Openings';
 export type SectionState = Record<SectionKey, 'expanded' | 'collapsed'>;
 export type PanelSizes = { rightStack: number[]; inputWidthPct: number };
+export type WindStat = { speed_kmh: number; year: number | null };
+export type BomWindResult = {
+  suburb: string;
+  status: 'ok' | 'unavailable';
+  fastest_recorded: WindStat | null;
+  average_last_year: WindStat | null;
+  weather_fact: string | null;
+};
 export type WeatherState = {
   suburb: string;
-  lastResult: unknown;
+  lastResult: BomWindResult | null;
+  fact: string | null;
   lastUpdated: string | null;
 };
 export type AdvisorState = {
@@ -49,7 +58,7 @@ const baseLayout: AppState = {
     Openings: 'collapsed',
   },
   panelSizes: { rightStack: [70, 10, 10, 10], inputWidthPct: 40 },
-  weather: { suburb: '', lastResult: null, lastUpdated: null },
+  weather: { suburb: '', lastResult: null, fact: null, lastUpdated: null },
   advisor: { history: [] },
 };
 
@@ -59,6 +68,44 @@ const defaultLayoutState: AppState = {
   weather: { ...baseLayout.weather },
   advisor: { history: [...baseLayout.advisor.history] },
 };
+
+function ensureWindStat(value: unknown): WindStat | null {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const record = value as Record<string, unknown>;
+  const speed = Number(record.speed_kmh);
+  const yearValue = record.year;
+  const year = typeof yearValue === 'number' && Number.isFinite(yearValue) ? Math.trunc(yearValue) : null;
+
+  if (!Number.isFinite(speed) || speed <= 0) {
+    return null;
+  }
+
+  return { speed_kmh: Math.round(speed), year };
+}
+
+function ensureBomWindResult(value: unknown): BomWindResult | null {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const data = value as Record<string, unknown>;
+  const suburb = typeof data.suburb === 'string' ? data.suburb : '';
+  const fastest = ensureWindStat(data.fastest_recorded);
+  const average = ensureWindStat(data.average_last_year);
+  const status = data.status === 'unavailable' ? 'unavailable' : 'ok';
+  const fact = typeof data.weather_fact === 'string' ? data.weather_fact : null;
+
+  return {
+    suburb,
+    status,
+    fastest_recorded: fastest,
+    average_last_year: average,
+    weather_fact: fact,
+  };
+}
 
 function ensureSectionState(value: unknown): SectionState {
   const sections: SectionState = { ...baseLayout.sections };
@@ -112,7 +159,17 @@ function ensureWeatherState(value: unknown): WeatherState {
   }
 
   if ('lastResult' in candidate) {
-    weather.lastResult = candidate.lastResult;
+    weather.lastResult = ensureBomWindResult((candidate as Record<string, unknown>).lastResult) ?? null;
+  }
+
+  if (typeof candidate.fact === 'string') {
+    weather.fact = candidate.fact;
+  } else if (candidate.fact === null) {
+    weather.fact = null;
+  }
+
+  if (!weather.fact && weather.lastResult?.weather_fact) {
+    weather.fact = weather.lastResult.weather_fact;
   }
 
   if (typeof candidate.lastUpdated === 'string') {

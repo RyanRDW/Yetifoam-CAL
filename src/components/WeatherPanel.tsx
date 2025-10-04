@@ -1,11 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLayout } from '../state/LayoutContext';
-
-interface BomResult {
-  fastest_recorded?: { speed_kmh: number; year: number };
-  average_last_year?: { speed_kmh: number; year: number };
-  status?: string;
-}
+import type { BomWindResult } from '../state/LayoutContext';
 
 export function WeatherPanel() {
   const {
@@ -31,13 +26,18 @@ export function WeatherPanel() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ suburb: query }),
       });
-      const json: BomResult = await res.json();
+      const json: BomWindResult = await res.json();
       if (!res.ok) {
         throw new Error((json as any)?.error?.message || 'BOM lookup failed');
       }
       dispatch({
         type: 'SET_WEATHER',
-        payload: { suburb: query, lastResult: json, lastUpdated: new Date().toISOString() },
+        payload: {
+          suburb: json.suburb ?? query,
+          lastResult: json,
+          fact: json.weather_fact ?? null,
+          lastUpdated: new Date().toISOString(),
+        },
       });
       setSuburb(query);
     } catch (e) {
@@ -48,6 +48,7 @@ export function WeatherPanel() {
         payload: {
           suburb: query,
           lastResult: weather.lastResult,
+          fact: weather.fact,
           lastUpdated: weather.lastUpdated,
         },
       });
@@ -57,9 +58,11 @@ export function WeatherPanel() {
     }
   }
 
-  const data = weather.lastResult as BomResult | null;
-  const fastest = data?.fastest_recorded;
-  const average = data?.average_last_year;
+  const data = weather.lastResult;
+  const fastest = data?.fastest_recorded ?? null;
+  const average = data?.average_last_year ?? null;
+  const status = data?.status ?? 'ok';
+  const weatherFact = useMemo(() => weather.fact ?? data?.weather_fact ?? null, [weather.fact, data]);
 
   return (
     <section className="rounded-2xl border border-slate-200 bg-white/70 p-5 shadow-sm backdrop-blur">
@@ -85,7 +88,7 @@ export function WeatherPanel() {
         </button>
       </div>
       {error && <p className="mt-3 text-sm text-rose-600">{error}</p>}
-      {data && !data.status && (
+      {status === 'ok' && data && (
         <dl className="mt-4 grid grid-cols-2 gap-3 text-sm text-slate-700">
           <div className="rounded-xl border border-slate-100 bg-white/80 p-3">
             <dt className="text-xs uppercase tracking-wide text-slate-500">Fastest Recorded</dt>
@@ -105,9 +108,14 @@ export function WeatherPanel() {
           </div>
         </dl>
       )}
-      {data?.status === 'unavailable' && (
+      {status === 'unavailable' && (
         <p className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700">
           Weather data is currently unavailable.
+        </p>
+      )}
+      {weatherFact && (
+        <p className="mt-4 rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm text-slate-700">
+          {weatherFact}
         </p>
       )}
     </section>

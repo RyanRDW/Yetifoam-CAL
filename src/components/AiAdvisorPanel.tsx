@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { llmCall, type ChatMessage } from '../services/llmClient';
 import { useLayout } from '../state/LayoutContext';
 
 export function AiAdvisorPanel() {
   const {
-    state: { advisor },
+    state: { advisor, weather },
     dispatch,
   } = useLayout();
   const [input, setInput] = useState('');
@@ -13,6 +13,43 @@ export function AiAdvisorPanel() {
 
   const history = advisor.history;
 
+  const systemPrompt = useMemo(() => {
+    const lines: string[] = [
+      'You are an expert YetiFoam sales consultant helping staff respond to customer questions.',
+      'Keep responses under 60 words. Use short bullet points when giving multiple recommendations. Be confident and practical.',
+    ];
+
+    const context: string[] = [];
+    if (weather.suburb) {
+      context.push(`Suburb: ${weather.suburb}`);
+    }
+
+    const fastest = weather.lastResult?.fastest_recorded;
+    if (fastest?.speed_kmh) {
+      context.push(
+        `Fastest wind: ${fastest.speed_kmh} km/h${fastest.year ? ` (${fastest.year})` : ''}`,
+      );
+    }
+
+    const average = weather.lastResult?.average_last_year;
+    if (average?.speed_kmh) {
+      context.push(
+        `Average winds last year: ${average.speed_kmh} km/h${average.year ? ` (${average.year})` : ''}`,
+      );
+    }
+
+    if (weather.fact) {
+      context.push(`Weather insight: ${weather.fact}`);
+    }
+
+    if (context.length > 0) {
+      lines.push('Current job context:');
+      lines.push(...context.map((entry) => `- ${entry}`));
+    }
+
+    return lines.join('\n');
+  }, [weather]);
+
   async function sendPrompt() {
     const question = input.trim();
     if (!question) return;
@@ -20,7 +57,7 @@ export function AiAdvisorPanel() {
     setError(null);
     const nextMessages: ChatMessage[] = [...history, { role: 'user', content: question }];
     try {
-      const reply = await llmCall({ messages: nextMessages });
+      const reply = await llmCall({ system: systemPrompt, messages: nextMessages });
       dispatch({
         type: 'SET_ADVISOR',
         payload: { history: [...nextMessages, { role: 'assistant', content: reply }] },
