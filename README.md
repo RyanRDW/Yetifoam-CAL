@@ -6,16 +6,17 @@
 - Supporting config lives in `src/config` (theme, labels, layout presets) to keep UI tokens and copy configurable without code edits.
 
 ## Current Build Status
-- Phase 0 scaffold is in place: Vite app boots, panel resizing persists (`src/state/LayoutContext.tsx`, `src/hooks/usePersistentState.ts`), and CollapsibleSection auto-collapses after 300 ms when `isComplete` is true.
+- Phase 0 scaffold remains solid: Vite app boots, panel resizing persists (`src/state/LayoutContext.tsx`, `src/hooks/usePersistentState.ts`), and CollapsibleSection auto-collapses after 300 ms when `isComplete` is true.
 - Weather lookup flow is wired end-to-end (`src/components/WeatherPanel.tsx` → `server/api/bom.ts` → `vendor/weather-au`), returning status-aware payloads with graceful error handling.
 - AI Advisor chat panel renders conversation history and calls `/api/llm`; request pipeline is guarded by rate limiting middleware and expects a valid OpenAI key.
-- Input sections are stubbed placeholders (`src/components/InputPanel.tsx`), and the results/sales panels are UI shells without calculation data; state machine for `InputMode`/`ResultsMode` has not been implemented yet.
-- No automated tests exist; `npm run test` is currently a Vitest hook ready for future suites.
+- Phase 1 inputs are complete: `src/components/inputs/*` implements suburb autocomplete, validated dimensions, pitch/cladding/member selectors, spray options, openings modal, and a calculate button gated by `isFormValid`. Form state persists via LayoutContext under `localStorage` key `yf:v1:ui`.
+- Results/sales panels are still placeholder shells; calculation engine and results choreography will arrive in Phase 2/3.
+- No automated tests exist; `npm run test` remains a Vitest hook ready for future suites.
 
 ## Next Development Tasks
-- Phase 1 inputs: run the Build Agent with prompt `ApplyPhase1InputComponents` to deliver suburb autocomplete, validated dimension inputs, pitch/cladding/member selectors, spray checkboxes, openings modal, and the Calculate button per spec.
 - Phase 2 calculations: run the Calculation Engine Agent with prompt `ImplementPhase2CalculationEngine` to translate Section 2 formulas into deterministic services and wire them to state.
 - Phase 3 presentation: run the Results & Insights Agent with prompt `AssemblePhase3ResultsDisplay` to surface computed areas, wind context, and sales notes in the right-hand stack, honoring animation timings.
+- Phase 4+ follow the existing roadmap once calculation outputs are in place.
 - Always hand the updated README back to the Permanent Project Summariser Agent after each phase to refresh permanent memory.
 
 ## Rules for Workflow
