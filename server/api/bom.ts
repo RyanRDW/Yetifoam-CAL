@@ -1,11 +1,10 @@
 import { IncomingMessage, ServerResponse } from "http";
-import { getWeather } from "../bom/client.ts";
+import { getWeather } from "../bom/client.js";
 
 export default async function handler(req: IncomingMessage, res: ServerResponse) {
   if (req.method !== "POST") {
     res.statusCode = 405;
-    res.setHeader("Content-Type", "application/json");
-    res.end(JSON.stringify({ error: "Method not allowed" }));
+    res.end();
     return;
   }
 
