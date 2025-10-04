@@ -1,49 +1,19 @@
-const TOKENS_PER_MINUTE = 10;
-const REFILL_INTERVAL_MS = 60_000;
+type Bucket = { tokens: number; last: number };
+const rpm = 10; // requests per minute
+const refillPerMs = rpm / 60000;
+const buckets = new Map<string, Bucket>();
 
-type BucketState = {
-  tokens: number;
-  lastRefill: number;
-};
-
-const buckets = new Map<string, BucketState>();
-
-export class RateLimitError extends Error {
-  public readonly status: number;
-
-  constructor(message = 'Rate limit exceeded. Try again soon.') {
-    super(message);
-    this.name = 'RateLimitError';
-    this.status = 429;
-  }
-}
-
-function refill(bucket: BucketState, now: number): void {
-  const elapsed = now - bucket.lastRefill;
-
-  if (elapsed <= 0) {
-    return;
-  }
-
-  const tokensToAdd = (elapsed / REFILL_INTERVAL_MS) * TOKENS_PER_MINUTE;
-  bucket.tokens = Math.min(TOKENS_PER_MINUTE, bucket.tokens + tokensToAdd);
-  bucket.lastRefill = now;
-}
-
-export function rateLimit(userId: string): void {
+export function rateLimit(userId: string) {
   const now = Date.now();
-  const bucket = buckets.get(userId) ?? {
-    tokens: TOKENS_PER_MINUTE,
-    lastRefill: now,
-  };
-
-  refill(bucket, now);
-
-  if (bucket.tokens < 1) {
-    buckets.set(userId, bucket);
-    throw new RateLimitError();
+  const b = buckets.get(userId) ?? { tokens: rpm, last: now };
+  const elapsed = now - b.last;
+  b.tokens = Math.min(rpm, b.tokens + elapsed * refillPerMs);
+  b.last = now;
+  if (b.tokens < 1) {
+    const err: any = new Error("Rate limit exceeded");
+    err.status = 429; err.type = "rate_limit";
+    throw err;
   }
-
-  bucket.tokens -= 1;
-  buckets.set(userId, bucket);
+  b.tokens -= 1;
+  buckets.set(userId, b);
 }
