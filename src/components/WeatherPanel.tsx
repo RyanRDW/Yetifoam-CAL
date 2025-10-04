@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLayout } from '../state/LayoutContext';
-import type { WeatherPayloadStatus, WeatherPayload } from '../state/LayoutContext';
+import type { WeatherStatus, WeatherPayload } from '../state/LayoutContext';
 
 interface WeatherApiResponse {
-  status?: WeatherPayloadStatus | string;
+  status?: WeatherStatus | string;
   suburb?: string;
   temp?: number;
   wind_kph?: number;
@@ -148,7 +148,7 @@ export function WeatherPanel() {
 }
 
 function toWeatherPayload(suburb: string, data: WeatherApiResponse): WeatherPayload {
-  const status: WeatherPayloadStatus =
+  const status: WeatherStatus =
     data.status === 'ok' || data.status === 'not_found' || data.status === 'no_data'
       ? data.status
       : 'error';

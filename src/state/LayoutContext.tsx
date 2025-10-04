@@ -12,9 +12,9 @@ export type SectionKey =
   | 'Openings';
 export type SectionState = Record<SectionKey, 'expanded' | 'collapsed'>;
 export type PanelSizes = { rightStack: number[]; inputWidthPct: number };
-export type WeatherPayloadStatus = 'ok' | 'not_found' | 'no_data' | 'error';
+export type WeatherStatus = 'ok' | 'not_found' | 'no_data' | 'error';
 export type WeatherPayload = {
-  status: WeatherPayloadStatus;
+  status: WeatherStatus;
   suburb: string | null;
   temp: number | null;
   wind_kph: number | null;
@@ -80,7 +80,7 @@ function ensureWeatherPayload(value: unknown): WeatherPayload | null {
   const data = value as Record<string, unknown>;
   const status =
     data.status === 'ok' || data.status === 'not_found' || data.status === 'no_data'
-      ? (data.status as WeatherPayloadStatus)
+      ? (data.status as WeatherStatus)
       : 'error';
 
   return {
