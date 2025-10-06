@@ -6,10 +6,8 @@ import { formatArea, formatNumber } from "../../results/utils/format";
 
 function formatSummary(form: FormState, result: CalculationResult | null, notes: string) {
   const lines: string[] = [];
-  const suburb = resolveSuburb(form, result);
   lines.push("YetiFoam Shed Quote");
   lines.push("");
-  lines.push(`Suburb: ${suburb}`);
   lines.push(`Dimensions (L×W×H): ${resolveDimensions(form, result)}`);
   lines.push(`Pitch: ${resolvePitch(form, result)} | Cladding: ${resolveCladding(form, result)}`);
   lines.push(`Spray total: ${resolveSprayTotal(result)}`);
@@ -23,15 +21,13 @@ function formatSummary(form: FormState, result: CalculationResult | null, notes:
 }
 
 function formatEmail(form: FormState, result: CalculationResult | null, notes: string) {
-  const suburb = resolveSuburb(form, result, { fallback: "your shed" });
   const parts: string[] = [];
-  const subject = `YetiFoam quote for ${suburb}`;
+  const subject = "YetiFoam shed quote";
   parts.push(`Subject: ${subject}`);
   parts.push("");
   parts.push("Hi,");
   parts.push("");
   parts.push("Here is your YetiFoam shed insulation summary:");
-  parts.push(`- Suburb: ${resolveSuburb(form, result)}`);
   parts.push(`- Dimensions (L×W×H): ${resolveDimensions(form, result)}`);
   parts.push(`- Pitch: ${resolvePitch(form, result)} | Cladding: ${resolveCladding(form, result)}`);
   parts.push(`- Spray total: ${resolveSprayTotal(result)}`);
@@ -77,12 +73,6 @@ export default function ExportPanel() {
     </div>
   );
 }
-
-function resolveSuburb(form: FormState, result: CalculationResult | null, options?: { fallback?: string }) {
-  const fallback = options?.fallback ?? "—";
-  return result?.location.suburb ?? form.location.suburb ?? fallback;
-}
-
 function resolveDimensions(form: FormState, result: CalculationResult | null) {
   if (result?.configuration.dimensions) {
     return result.configuration.dimensions;

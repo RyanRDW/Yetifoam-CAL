@@ -7,7 +7,6 @@ export interface UIState {
 const defaults: UIState = {
   version: 1,
   sections: {
-    Location: 'expanded',
     Dimensions: 'expanded',
     Pitch: 'expanded',
     Cladding: 'expanded',
@@ -57,6 +56,6 @@ export function migrateUI(source: any): UIState {
 // basic tests
 export const tests = [
   () => migrateUI(undefined),         // empty → defaults
-  () => migrateUI({ sections: { Location: 'collapsed' } }), // old → new fills
+  () => migrateUI({ sections: { Dimensions: 'collapsed' } }), // old → new fills
   () => migrateUI(defaults)           // round-trip
 ];

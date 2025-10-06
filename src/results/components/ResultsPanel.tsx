@@ -6,7 +6,6 @@ import { BreakdownTable } from './BreakdownTable';
 import { ConfigSummary } from './ConfigSummary';
 import { Toolbar } from './Toolbar';
 import { TotalsSummary } from './TotalsSummary';
-import { WindSnapshot } from './WindSnapshot';
 
 export function ResultsPanel() {
   const { state, dispatch } = useLayout();
@@ -38,8 +37,8 @@ export function ResultsPanel() {
       <header className="flex items-start justify-between">
         <div>
           <h2 className="text-base font-semibold text-slate-800">Results</h2>
-          {lastResult?.location.suburb && (
-            <p className="text-sm text-slate-500">{lastResult.location.suburb}</p>
+          {lastResult?.jobId && (
+            <p className="text-xs text-slate-400">Job: {lastResult.jobId}</p>
           )}
         </div>
         {lastResult?.calculatedAt && (
@@ -61,10 +60,7 @@ export function ResultsPanel() {
 
       {lastResult ? (
         <div className="flex flex-1 flex-col gap-4 overflow-y-auto pr-1">
-          <div className="grid gap-4 md:grid-cols-[1fr_1fr]">
-            <ConfigSummary configuration={lastResult.configuration} />
-            <WindSnapshot wind={lastResult.location.wind} />
-          </div>
+          <ConfigSummary configuration={lastResult.configuration} />
           <TotalsSummary breakdown={lastResult.breakdown} />
           <BreakdownTable breakdown={lastResult.breakdown} />
         </div>

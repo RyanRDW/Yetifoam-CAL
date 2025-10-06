@@ -1,16 +1,15 @@
 # YetiFoam Shed Calculator
 ## Overview
-- Desktop estimator for YetiFoam sales staff to scope spray foam jobs on Victorian metal sheds.
+- Desktop estimator for YetiFoam sales staff to scope spray foam jobs on metal sheds.
 - Frontend: React 19 + TypeScript, Vite, Tailwind layer; layout via `react-resizable-panels` with localStorage persistence.
-- Backend: lightweight Node/TS server (`server/index.ts`) exposing `/api/bom` and `/api/llm` over HTTP, powered by the BOM vendor wrapper and OpenAI SDK.
+- Backend: lightweight Node/TS server (`server/index.ts`) exposing `/api/llm` and `/api/sales` over HTTP, powered by the OpenAI SDK.
 - Supporting config lives in `src/config` (theme, labels, layout presets) to keep UI tokens and copy configurable without code edits.
 
 ## Current Build Status
 - Phase 0 scaffold remains solid: Vite app boots, panel resizing persists (`src/state/LayoutContext.tsx`, `src/hooks/usePersistentState.ts`), and CollapsibleSection auto-collapses after 300 ms when `isComplete` is true.
-- Weather lookup flow is wired end-to-end (`src/components/WeatherPanel.tsx` → `server/api/bom.ts` → `vendor/weather-au`), returning status-aware payloads with graceful error handling.
 - AI Advisor chat panel renders conversation history and calls `/api/llm`; request pipeline is guarded by rate limiting middleware and expects a valid OpenAI key.
-- Phase 1 inputs are complete: `src/components/inputs/*` implements suburb autocomplete, validated dimensions, pitch/cladding/member selectors, spray options, openings modal, and a calculate button gated by `isFormValid`. Form state persists via LayoutContext under `localStorage` key `yf:v1:ui`.
-- Phase 3 results experience is live: `src/results/CalculationController.tsx` orchestrates the 800 ms calculate animation, `ResultsPanel` now renders `ConfigSummary`, `WindSnapshot`, `TotalsSummary`, and `BreakdownTable` with the floating `Toolbar`, and the right-rail Export panel surfaces manual copy text blocks while respecting persisted layout proportions.
+- Phase 1 inputs are complete: `src/components/inputs/*` implements validated dimensions, pitch/cladding/member selectors, spray options, openings modal, and a calculate button gated by `isFormValid`. Form state persists via LayoutContext under `localStorage` key `yf:v1:ui`.
+- Phase 3 results experience is live: `src/results/CalculationController.tsx` orchestrates the 800 ms calculate animation, `ResultsPanel` now renders `ConfigSummary`, `TotalsSummary`, and `BreakdownTable` with the floating `Toolbar`, and the right-rail Export panel surfaces manual copy text blocks while respecting persisted layout proportions.
 - No automated tests exist; `npm run test` remains a Vitest hook ready for future suites.
 
 ## Export (Text-only, No Storage)
@@ -31,12 +30,10 @@ The Export panel renders a summary and an email draft as plain text. Users copy/
 - Required `.env` keys: `OPENAI_API_KEY` (must be set for `/api/llm`), optional `OPENAI_MODEL` (defaults to `gpt-5`); copy `.env.example` as a starting point.
 - Ports: Vite dev server on 5173, API server on 8787 (`PORT` override supported); ensure both are free before running `npm run dev:all`.
 - Scripts: `npm run dev` (frontend only), `npm run server` (API only), `npm run dev:all` (concurrently run both with shared `.env`), `npm run build` (production bundle), `npm run test` (Vitest placeholder).
-- Dependencies: Node 18+, local BOM access requires outbound HTTPS; vendor weather module ships in `vendor/weather-au` and should not be replaced without verification.
+- Dependencies: Node 18+.
 
 ## Known Issues
-- BOM weather API can return `not_found` or `no_data` for sparse suburbs or fail when the Bureau service throttles; user-facing messaging surfaces these states but does not yet offer manual overrides.
 - Running `npm run dev:all` will fail if 5173 or 8787 are occupied; adjust `VITE_PORT`/`PORT` in `.env` or stop the conflicting processes before retrying.
-- If weather is unavailable, advisors still run but lose context-driven insights; fallback is to proceed with sales data only and optionally stash a manual weather note in the advisor history.
 
 ## Commit & Push Guide
 - `git status` (review staged and unstaged changes).
@@ -60,7 +57,7 @@ The Export panel renders a summary and an email draft as plain text. Users copy/
 - Phase 5 – Export & Polish: generate PDF/email outputs, add final styling, accessibility, and performance passes; optional Phase 6 adds admin tooling later.
 
 ## Sales Data Integration Note
-- Weather insights enrich resilience conversations but are non-blocking; core sales estimates derive from dimensions, cladding, and member data, so the app must operate even when BOM data is missing—document any manual adjustments and continue with pricing workflows.
+- Sales insights lean on calculation outputs, curated knowledge base snippets, and recorded feedback. Ensure calc summaries stay accurate and log any manual adjustments inside advisor notes so regenerated pitches remain aligned.
 
 <!-- PHASE-4-PLACEHOLDERS -->
 ## Phase 4 Placeholders — Validation

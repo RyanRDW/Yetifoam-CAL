@@ -4,7 +4,7 @@ import { useLayout } from '../state/LayoutContext';
 
 export function AiAdvisorPanel() {
   const {
-    state: { advisor, weather },
+    state: { advisor },
     dispatch,
   } = useLayout();
   const [input, setInput] = useState('');
@@ -13,46 +13,14 @@ export function AiAdvisorPanel() {
 
   const history = advisor.history;
 
-  const systemPrompt = useMemo(() => {
-    const lines: string[] = [
-      'You are an expert YetiFoam sales consultant helping staff respond to customer questions.',
-      'Keep responses under 60 words. Use short bullet points when giving multiple recommendations. Be confident and practical.',
-    ];
-
-    const context: string[] = [];
-    if (weather.suburb) {
-      context.push(`Suburb: ${weather.suburb}`);
-    }
-
-    if (weather.lastResult?.status === 'ok') {
-      const reading = weather.lastResult;
-      if (reading.wind_kph != null) {
-        context.push(`Wind speed: ${reading.wind_kph} km/h`);
-      }
-      if (reading.gust_kph != null) {
-        context.push(`Recent gust: ${reading.gust_kph} km/h`);
-      }
-      if (reading.temp != null) {
-        context.push(`Temperature: ${reading.temp} °C`);
-      }
-      if (reading.humidity != null) {
-        context.push(`Humidity: ${reading.humidity}%`);
-      }
-    } else if (weather.lastResult?.message) {
-      context.push(`Weather lookup note: ${weather.lastResult.message}`);
-    }
-
-    if (weather.fact) {
-      context.push(`Weather insight: ${weather.fact}`);
-    }
-
-    if (context.length > 0) {
-      lines.push('Current job context:');
-      lines.push(...context.map((entry) => `- ${entry}`));
-    }
-
-    return lines.join('\n');
-  }, [weather]);
+  const systemPrompt = useMemo(
+    () =>
+      [
+        'You are an expert YetiFoam sales consultant helping staff respond to customer questions.',
+        'Keep responses under 60 words. Use short bullet points when giving multiple recommendations. Be confident and practical.',
+      ].join('\n'),
+    [],
+  );
 
   async function sendPrompt() {
     const question = input.trim();

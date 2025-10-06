@@ -1,7 +1,6 @@
 import presets from '../config/presets.json';
 import type { AppState, CalculationResult, CalculationMode, OpeningDetail, ResultsState } from './LayoutContext';
 import type { FormState, OpeningType, ValidFormState } from './formSchema';
-import type { WeatherState } from './LayoutContext';
 
 const pitchFactors = presets.pitch_factors as Record<string, number>;
 const claddingFactors = presets.cladding_factors as Record<string, number>;
@@ -12,7 +11,6 @@ const wallSpacingPresets = presets.spacing_presets.walls as Record<string, numbe
 const openingsLibrary = presets.openings_library as Record<OpeningType, { area?: number; surface: string; width?: number }>;
 
 export type LivePreviewSummary = {
-  locationLabel: string | null;
   dimensionsLabel: string | null;
   pitchLabel: string;
   pitchAssumed: boolean;
@@ -34,7 +32,6 @@ export function selectResults(state: AppState): ResultsState {
 
 export function selectLivePreview(state: AppState): LivePreviewSummary {
   const { form } = state;
-  const suburb = coerceString(form.location.suburb);
   const dimensionsLabel = isNumber(form.dimensions.length) && isNumber(form.dimensions.width) && isNumber(form.dimensions.height)
     ? `${formatNumber(form.dimensions.length)} × ${formatNumber(form.dimensions.width)} × ${formatNumber(form.dimensions.height)} m`
     : null;
@@ -49,12 +46,11 @@ export function selectLivePreview(state: AppState): LivePreviewSummary {
   const openingsCount = countOpenings(form.openings);
 
   const warnings: string[] = [];
-  if (!suburb || !dimensionsLabel || !claddingLabel || !form.members.roof || !form.members.walls) {
+  if (!dimensionsLabel || !claddingLabel || !form.members.roof || !form.members.walls) {
     warnings.push('Complete all inputs to calculate');
   }
 
   return {
-    locationLabel: suburb,
     dimensionsLabel,
     pitchLabel: pitchInfo.label,
     pitchAssumed: pitchInfo.assumed,
@@ -65,7 +61,7 @@ export function selectLivePreview(state: AppState): LivePreviewSummary {
   };
 }
 
-export function calculateResult(form: ValidFormState, weather: WeatherState): CalculationResult {
+export function calculateResult(form: ValidFormState): CalculationResult {
   const pitchInfo = resolvePitchInfo(form);
   const length = form.dimensions.length!;
   const width = form.dimensions.width!;
@@ -114,15 +110,9 @@ export function calculateResult(form: ValidFormState, weather: WeatherState): Ca
   const surfacesNet = surfacesSubtotal - openingsDeducted;
   const netTotal = surfacesNet + membersTotal;
 
-  const wind = deriveWindSnapshot(weather);
-
   return {
-    jobId: form.location.postcode ? `job-${form.location.postcode}` : `job-${Date.now()}`,
+    jobId: `job-${Date.now()}`,
     calculatedAt: new Date().toISOString(),
-    location: {
-      suburb: coerceString(form.location.suburb),
-      wind,
-    },
     configuration: {
       dimensions: `${formatNumber(length)} × ${formatNumber(width)} × ${formatNumber(height)} m`,
       pitchLabel: pitchInfo.label,
@@ -146,30 +136,6 @@ export function calculateResult(form: ValidFormState, weather: WeatherState): Ca
       membersTotal,
       netTotal,
     },
-  };
-}
-
-function deriveWindSnapshot(weather: WeatherState): CalculationResult['location']['wind'] {
-  const result = weather.lastResult;
-  if (!result) {
-    return null;
-  }
-
-  const fastest = isNumber(result.wind_kph)
-    ? { speed: result.wind_kph, year: null }
-    : null;
-  const average = isNumber(result.gust_kph)
-    ? { speed: result.gust_kph, year: null }
-    : null;
-
-  if (!fastest && !average) {
-    return null;
-  }
-
-  return {
-    fastestRecorded: fastest,
-    averageLastYear: average,
-    sourceSuburb: coerceString(result.suburb) ?? coerceString(weather.suburb),
   };
 }
 
@@ -287,13 +253,6 @@ function toTitle(value: string | null): string | null {
 
 function buildMembersLabel(roof: string | null, walls: string | null): string {
   return `Roof: ${roof ? toTitle(roof) : '—'} / Walls: ${walls ? toTitle(walls) : '—'}`;
-}
-
-function coerceString(value: unknown): string | null {
-  if (typeof value === 'string' && value.trim()) {
-    return value.trim();
-  }
-  return null;
 }
 
 function isNumber(value: unknown): value is number {

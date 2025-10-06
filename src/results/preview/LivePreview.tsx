@@ -26,7 +26,6 @@ export function LivePreview() {
       </header>
       <div className="flex-1 overflow-y-auto rounded-2xl border border-slate-200 bg-white/75 p-5 shadow-sm">
         <dl className="space-y-4 text-sm text-slate-700">
-          <PreviewRow label="Location" value={summary.locationLabel ?? 'Not set'} />
           <PreviewRow label="Dimensions" value={summary.dimensionsLabel ?? 'Not set'} />
           <PreviewRow label="Pitch" value={summary.pitchLabel} highlight={summary.pitchAssumed} />
           <PreviewRow label="Cladding" value={summary.claddingLabel ?? 'Not selected'} />

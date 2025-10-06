@@ -1,6 +1,5 @@
 {
   "sections": {
-    "Location": "Location",
     "Dimensions": "Shed Dimensions",
     "Pitch": "Roof Pitch",
     "Cladding": "Cladding Type",
@@ -9,7 +8,6 @@
     "Openings": "Openings"
   },
   "fields": {
-    "suburb": "Suburb",
     "length": "Length (m)",
     "width": "Width (m)",
     "wall_height": "Wall Height (m)",

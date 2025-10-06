@@ -4,7 +4,6 @@ import { usePersistentState } from '../hooks/usePersistentState';
 import { type FormState, defaultFormValues, ensureFormState, formDraftSchema } from './formSchema';
 
 export type SectionKey =
-  | 'Location'
   | 'Dimensions'
   | 'Pitch'
   | 'Cladding'
@@ -13,23 +12,6 @@ export type SectionKey =
   | 'Openings';
 export type SectionState = Record<SectionKey, 'expanded' | 'collapsed'>;
 export type PanelSizes = { rightStack: number[]; inputWidthPct: number };
-export type WeatherStatus = 'ok' | 'not_found' | 'no_data' | 'error';
-export type WeatherPayload = {
-  status: WeatherStatus;
-  suburb: string | null;
-  temp: number | null;
-  wind_kph: number | null;
-  gust_kph: number | null;
-  humidity: number | null;
-  fact: string | null;
-  message: string | null;
-};
-export type WeatherState = {
-  suburb: string;
-  lastResult: WeatherPayload | null;
-  fact: string | null;
-  lastUpdated: string | null;
-};
 export type AdvisorState = {
   history: ChatMessage[];
 };
@@ -59,14 +41,6 @@ export type CalculationBreakdown = {
 export type CalculationResult = {
   jobId: string;
   calculatedAt: string;
-  location: {
-    suburb: string | null;
-    wind?: {
-      fastestRecorded: { speed: number | null; year: number | null } | null;
-      averageLastYear: { speed: number | null; year: number | null } | null;
-      sourceSuburb: string | null;
-    } | null;
-  };
   configuration: {
     dimensions: string;
     pitchLabel: string;
@@ -85,7 +59,6 @@ export type ResultsState = {
 export type AppState = {
   sections: SectionState;
   panelSizes: PanelSizes;
-  weather: WeatherState;
   advisor: AdvisorState;
   mode: CalculationMode;
   results: ResultsState;
@@ -94,7 +67,6 @@ export type AppState = {
 
 const STORAGE_KEY = 'yf:v1:ui';
 const SECTION_KEYS: readonly SectionKey[] = [
-  'Location',
   'Dimensions',
   'Pitch',
   'Cladding',
@@ -105,7 +77,6 @@ const SECTION_KEYS: readonly SectionKey[] = [
 
 const baseLayout: AppState = {
   sections: {
-    Location: 'expanded',
     Dimensions: 'expanded',
     Pitch: 'expanded',
     Cladding: 'expanded',
@@ -114,7 +85,6 @@ const baseLayout: AppState = {
     Openings: 'collapsed',
   },
   panelSizes: { rightStack: [65, 35], inputWidthPct: 40 },
-  weather: { suburb: '', lastResult: null, fact: null, lastUpdated: null },
   advisor: { history: [] },
   mode: 'input',
   results: {
@@ -128,7 +98,6 @@ const baseLayout: AppState = {
 const defaultLayoutState: AppState = {
   sections: { ...baseLayout.sections },
   panelSizes: { inputWidthPct: baseLayout.panelSizes.inputWidthPct, rightStack: [...baseLayout.panelSizes.rightStack] },
-  weather: { ...baseLayout.weather },
   advisor: { history: [...baseLayout.advisor.history] },
   mode: baseLayout.mode,
   results: {
@@ -138,40 +107,6 @@ const defaultLayoutState: AppState = {
   },
   form: { ...baseLayout.form },
 };
-
-function ensureWeatherPayload(value: unknown): WeatherPayload | null {
-  if (!value || typeof value !== 'object') {
-    return null;
-  }
-
-  const data = value as Record<string, unknown>;
-  const status =
-    data.status === 'ok' || data.status === 'not_found' || data.status === 'no_data'
-      ? (data.status as WeatherStatus)
-      : 'error';
-
-  return {
-    status,
-    suburb: typeof data.suburb === 'string' ? data.suburb : null,
-    temp: coerceNumber(data.temp),
-    wind_kph: coerceNumber(data.wind_kph),
-    gust_kph: coerceNumber(data.gust_kph),
-    humidity: coerceNumber(data.humidity),
-    fact: typeof data.fact === 'string' ? data.fact : null,
-    message: typeof data.message === 'string' ? data.message : null,
-  };
-}
-
-function coerceNumber(value: unknown): number | null {
-  if (typeof value === 'number' && Number.isFinite(value)) {
-    return value;
-  }
-  if (typeof value === 'string' && value.trim()) {
-    const numeric = Number(value);
-    return Number.isFinite(numeric) ? numeric : null;
-  }
-  return null;
-}
 
 function ensureSectionState(value: unknown): SectionState {
   const sections: SectionState = { ...baseLayout.sections };
@@ -218,41 +153,6 @@ function ensurePanelSizes(value: unknown): PanelSizes {
   return panelSizes;
 }
 
-function ensureWeatherState(value: unknown): WeatherState {
-  const weather: WeatherState = { ...baseLayout.weather };
-
-  if (!value || typeof value !== 'object') {
-    return weather;
-  }
-
-  const candidate = value as Partial<WeatherState>;
-  if (typeof candidate.suburb === 'string') {
-    weather.suburb = candidate.suburb;
-  }
-
-  if ('lastResult' in candidate) {
-    weather.lastResult = ensureWeatherPayload((candidate as Record<string, unknown>).lastResult) ?? null;
-  }
-
-  if (typeof candidate.fact === 'string') {
-    weather.fact = candidate.fact;
-  } else if (candidate.fact === null) {
-    weather.fact = null;
-  }
-
-  if (!weather.fact && weather.lastResult?.fact) {
-    weather.fact = weather.lastResult.fact;
-  }
-
-  if (typeof candidate.lastUpdated === 'string') {
-    weather.lastUpdated = candidate.lastUpdated;
-  } else if (candidate.lastUpdated === null) {
-    weather.lastUpdated = null;
-  }
-
-  return weather;
-}
-
 function ensureAdvisorState(value: unknown): AdvisorState {
   const advisor: AdvisorState = { history: [...baseLayout.advisor.history] };
 
@@ -292,8 +192,9 @@ function ensureAppState(value: unknown): AppState {
     return {
       sections: ensureSectionState(undefined),
       panelSizes: ensurePanelSizes(undefined),
-      weather: ensureWeatherState(undefined),
       advisor: ensureAdvisorState(undefined),
+      mode: baseLayout.mode,
+      results: ensureResultsState(undefined),
       form: ensureFormState(undefined),
     };
   }
@@ -302,7 +203,6 @@ function ensureAppState(value: unknown): AppState {
   return {
     sections: ensureSectionState(candidate.sections),
     panelSizes: ensurePanelSizes(candidate.panelSizes),
-    weather: ensureWeatherState(candidate.weather),
     advisor: ensureAdvisorState(candidate.advisor),
     mode: candidate.mode === 'calculating' || candidate.mode === 'results' ? candidate.mode : 'input',
     results: ensureResultsState(candidate.results),
@@ -313,7 +213,6 @@ function ensureAppState(value: unknown): AppState {
 export type Action =
   | { type: 'SET_SECTIONS'; payload: SectionState }
   | { type: 'SET_PANELS'; payload: PanelSizes }
-  | { type: 'SET_WEATHER'; payload: WeatherState }
   | { type: 'SET_ADVISOR'; payload: AdvisorState }
   | { type: 'SET_FORM'; payload: FormState }
   | { type: 'SET_MODE'; payload: CalculationMode }
@@ -325,8 +224,6 @@ function reduce(state: AppState, action: Action): AppState {
       return { ...state, sections: action.payload };
     case 'SET_PANELS':
       return { ...state, panelSizes: action.payload };
-    case 'SET_WEATHER':
-      return { ...state, weather: action.payload };
     case 'SET_ADVISOR':
       return { ...state, advisor: action.payload };
     case 'SET_FORM': {

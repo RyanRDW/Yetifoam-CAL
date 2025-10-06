@@ -1,0 +1,18 @@
+{
+  "price_rebuttals": [
+    {
+      "id": "PRICE001",
+      "objection_type": "upfront_cost",
+      "rebuttal_structure": [
+        { "phase": "performance_gap", "text": "Alternatives ignore bridging, structure, condensation—the core factors." },
+        { "phase": "multi_product_failure", "text": "Alternatives = wall + vapor barrier + wrap + batts; still ineffective. YetiFoam = 1 product." },
+        { "phase": "manufacturer_accountability", "text": "Manufacturers don't install; real-world conditions break claims." },
+        { "phase": "managing_vs_eliminating", "text": "Others manage condensation; YetiFoam eliminates it." },
+        { "phase": "long_term_reality", "text": "25-year performance data. No repairs/replacements." },
+        { "phase": "cascading_benefits", "text": "Structural + thermal + moisture wins compound value." }
+      ],
+      "cascade_trigger": "CAS002",
+      "tags": ["price", "value"]
+    }
+  ]
+}

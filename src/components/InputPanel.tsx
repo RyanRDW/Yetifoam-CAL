@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 import { CollapsibleSection } from './CollapsibleSection';
-import { LocationInput } from './inputs/LocationInput';
 import { Dimensions } from './inputs/Dimensions';
 import { PitchSelector } from './inputs/PitchSelector';
 import { CladdingSelector } from './inputs/CladdingSelector';
@@ -29,7 +28,6 @@ export function InputPanel() {
     isDimensionComplete(form.dimensions.width, 50) &&
     isDimensionComplete(form.dimensions.height, 10);
 
-  const locationComplete = Boolean(form.location.suburb);
   const pitchComplete = Boolean(form.pitch.selected && (form.pitch.selected !== 'unknown' || form.pitch.suggested));
   const claddingComplete = Boolean(form.cladding.type);
   const membersComplete = Boolean(form.members.roof && form.members.walls);
@@ -52,10 +50,6 @@ export function InputPanel() {
 
   return (
     <div className="flex h-full flex-col gap-4 overflow-y-auto px-4 py-6">
-      <CollapsibleSection id="loc" title="Location" isComplete={locationComplete}>
-        <LocationInput />
-      </CollapsibleSection>
-
       <CollapsibleSection id="dim" title="Dimensions" isComplete={dimensionsComplete}>
         <Dimensions />
       </CollapsibleSection>

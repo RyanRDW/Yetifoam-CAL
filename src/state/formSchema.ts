@@ -36,21 +36,11 @@ const intCount = z
   .int('Quantity must be whole number')
   .min(0, 'Quantity cannot be negative');
 
-const postcodeSchema = z
-  .string()
-  .trim()
-  .length(4, 'Postcode must be 4 digits')
-  .regex(/^[0-9]{4}$/g, 'Postcode must be numeric');
-
 export const baseOpeningsSchema = z.object(
   Object.fromEntries(openingTypes.map((type) => [type, intCount])) as Record<OpeningType, typeof intCount>,
 );
 
 export const formDraftSchema = z.object({
-  location: z.object({
-    suburb: z.string().trim().min(1).nullable(),
-    postcode: postcodeSchema.nullable(),
-  }),
   dimensions: z.object({
     length: z.number().nullable(),
     width: z.number().nullable(),
@@ -76,14 +66,6 @@ export const formDraftSchema = z.object({
 });
 
 export const formSchema = formDraftSchema.superRefine((value, ctx) => {
-  if (!value.location.suburb) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: 'Select a suburb',
-      path: ['location', 'suburb'],
-    });
-  }
-
   for (const [key, max] of [
     ['length', 50],
     ['width', 50],
@@ -170,7 +152,6 @@ export type ValidFormState = z.infer<typeof formSchema>;
 const zeroOpenings = Object.fromEntries(openingTypes.map((type) => [type, 0])) as Record<OpeningType, number>;
 
 export const defaultFormValues: FormState = {
-  location: { suburb: null, postcode: null },
   dimensions: { length: null, width: null, height: null },
   pitch: { selected: null, suggested: null, assumed: false },
   cladding: { type: null },
@@ -186,10 +167,6 @@ export function ensureFormState(value: unknown): FormState {
 
   const candidate = value as Partial<FormState>;
   const merged: FormState = {
-    location: {
-      suburb: typeof candidate.location?.suburb === 'string' ? candidate.location?.suburb : null,
-      postcode: typeof candidate.location?.postcode === 'string' ? candidate.location?.postcode : null,
-    },
     dimensions: {
       length: toNumeric(candidate.dimensions?.length),
       width: toNumeric(candidate.dimensions?.width),

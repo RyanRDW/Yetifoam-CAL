@@ -15,7 +15,6 @@
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-resizable-panels": "^3.0.6",
-    "weather-au": "file:vendor/weather-au",
     "zod": "^4.1.11"
   },
   "devDependencies": {

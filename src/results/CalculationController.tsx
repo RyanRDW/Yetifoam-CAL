@@ -28,7 +28,7 @@ export function CalculationController() {
         return;
       }
 
-      const calculation = calculateResult(state.form, state.weather);
+      const calculation = calculateResult(state.form);
 
       timers.current.forEach((id) => window.clearTimeout(id));
       timers.current = [];
@@ -85,7 +85,7 @@ export function CalculationController() {
 
     window.addEventListener('calculate-requested', handleCalculate);
     return () => window.removeEventListener('calculate-requested', handleCalculate);
-  }, [dispatch, state.sections, state.form, state.results.lastResult, state.weather]);
+  }, [dispatch, state.sections, state.form, state.results.lastResult]);
 
   return null;
 }
