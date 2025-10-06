@@ -1,5 +1,4 @@
 import React, { createContext, useCallback, useContext, useMemo } from 'react';
-import type { ChatMessage } from '../services/llmClient';
 import { usePersistentState } from '../hooks/usePersistentState';
 import { type FormState, defaultFormValues, ensureFormState, formDraftSchema } from './formSchema';
 
@@ -12,8 +11,15 @@ export type SectionKey =
   | 'Openings';
 export type SectionState = Record<SectionKey, 'expanded' | 'collapsed'>;
 export type PanelSizes = { rightStack: number[]; inputWidthPct: number };
+export type AdvisorEntry = {
+  id: string;
+  question: string;
+  variants: string[];
+  closing: string;
+  createdAt: string;
+};
 export type AdvisorState = {
-  history: ChatMessage[];
+  history: AdvisorEntry[];
 };
 export type CalculationMode = 'input' | 'calculating' | 'results';
 export type ResultStatus = 'idle' | 'pending' | 'ready' | 'error';
@@ -74,6 +80,12 @@ const SECTION_KEYS: readonly SectionKey[] = [
   'SprayOptions',
   'Openings',
 ];
+
+const ADVISOR_VARIANT_FALLBACK = [
+  'Standard foam application for this size.',
+  'Premium option with extra coverage.',
+];
+const ADVISOR_CLOSING_FALLBACK = "Let's discuss the best fit for your shed.";
 
 const baseLayout: AppState = {
   sections: {
@@ -154,18 +166,42 @@ function ensurePanelSizes(value: unknown): PanelSizes {
 }
 
 function ensureAdvisorState(value: unknown): AdvisorState {
-  const advisor: AdvisorState = { history: [...baseLayout.advisor.history] };
-
   if (!value || typeof value !== 'object') {
-    return advisor;
+    return { history: [] };
   }
 
   const history = (value as Record<string, unknown>).history;
-  if (Array.isArray(history)) {
-    advisor.history = history as ChatMessage[];
+  if (!Array.isArray(history)) {
+    return { history: [] };
   }
 
-  return advisor;
+  const entries: AdvisorEntry[] = [];
+  history.forEach((entry, index) => {
+    if (!entry || typeof entry !== 'object') {
+      return;
+    }
+    const record = entry as Record<string, unknown>;
+    if (!Array.isArray(record.variants)) {
+      return;
+    }
+    const variants = record.variants
+      .map((item) => (typeof item === 'string' ? item.trim() : ''))
+      .filter((item) => item.length > 0);
+    const closingRaw = typeof record.closing === 'string' ? record.closing.trim() : null;
+    const question = typeof record.question === 'string' ? record.question : '';
+    const createdAt = typeof record.createdAt === 'string' ? record.createdAt : new Date().toISOString();
+    const id = typeof record.id === 'string' ? record.id : `advisor-${index}`;
+
+    entries.push({
+      id,
+      question,
+      variants: variants.length > 0 ? variants : [...ADVISOR_VARIANT_FALLBACK],
+      closing: closingRaw && closingRaw.length > 0 ? closingRaw : ADVISOR_CLOSING_FALLBACK,
+      createdAt,
+    });
+  });
+
+  return { history: entries };
 }
 
 function ensureResultsState(value: unknown): ResultsState {

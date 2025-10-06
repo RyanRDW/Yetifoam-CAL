@@ -1,142 +1,100 @@
 import React, { useState } from 'react';
-import { composePitch } from '../../services/salesComposer';
-import { feedbackProcessor } from '../../services/feedbackProcessor';
-import { ComposeInput, ComposeOutput } from '../../types/sales.types';
+import { composeSales, DEFAULT_SALES_VARIANTS, DEFAULT_SALES_CLOSING, type SalesResponse } from '../../services/salesComposer';
+import { useLayout } from '../../state/LayoutContext';
+import { formSchema } from '../../state/formSchema';
 
 export const SalesPanel: React.FC = () => {
-  const [customerNotes, setCustomerNotes] = useState('');
-  const [suburb, setSuburb] = useState('');
-  const [state, setState] = useState('VIC');
-  const [cladding, setCladding] = useState('Colourbond');
-  const [options, setOptions] = useState<string[]>(['walls', 'roof']);
-  const [output, setOutput] = useState<ComposeOutput | null>(null);
+  const { state } = useLayout();
+  const [notes, setNotes] = useState('');
+  const [feedback, setFeedback] = useState('');
+  const [output, setOutput] = useState<SalesResponse | null>(null);
   const [loading, setLoading] = useState(false);
-  const [feedbackText, setFeedbackText] = useState('');
-
-  const buildInput = (): ComposeInput => ({
-    customer_notes: customerNotes,
-    calc_summary: {
-      dimensions: { L: 10, W: 8, H: 3 },
-      areas: { roof: 80, walls: 120 },
-      materials: { cladding, members: ['steel_frame','steel_purlin'] },
-      options
-    },
-    region: { suburb, state }
-  });
+  const [error, setError] = useState<string | null>(null);
 
   const handleGenerate = async () => {
-    setLoading(true);
-    try {
-      const input = buildInput();
-      const result = await composePitch(input);
-      setOutput(result);
-    } catch (e) {
-      console.error(e);
-      alert('Generation failed');
-    } finally { setLoading(false); }
-  };
+    const validation = formSchema.safeParse(state.form);
+    if (!validation.success) {
+      setError('Complete all required inputs before generating sales variants.');
+      return;
+    }
 
-  const handleFeedbackSubmit = async () => {
-    if (!output || !feedbackText.trim()) return;
     setLoading(true);
+    setError(null);
     try {
-      const input = buildInput();
-      await feedbackProcessor.saveFeedback(input, output, feedbackText);
-      const updated = await composePitch(input);
-      setOutput(updated);
-      setFeedbackText('');
-      alert('Feedback applied');
+      const response = await composeSales({
+        form: validation.data,
+        feedback: {
+          notes,
+          followUp: feedback,
+        },
+      });
+      setOutput(response);
     } catch (e) {
-      console.error(e);
-      alert('Failed to apply feedback');
-    } finally { setLoading(false); }
+      const message = e instanceof Error ? e.message : 'Sales composer request failed.';
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div style={{ padding: 20, maxWidth: 1200, margin: '0 auto' }}>
-      <h1>YetiFoam Sales Benefits Composer</h1>
+    <div className="mx-auto max-w-4xl space-y-6 p-6">
+      <header className="space-y-2">
+        <h1 className="text-2xl font-semibold text-slate-800">Sales Composer</h1>
+        <p className="text-sm text-slate-500">
+          Generates sales talking points from the current form data. Adjust the inputs in the main panel before requesting
+          variants.
+        </p>
+      </header>
 
-      <div style={{ marginBottom: 24, border: '1px solid #ddd', padding: 16, borderRadius: 8 }}>
-        <h2>Customer Details</h2>
-        <label style={{ display:'block', fontWeight:'bold', marginTop:8 }}>Customer Notes</label>
-        <textarea rows={4} value={customerNotes} onChange={e=>setCustomerNotes(e.target.value)} style={{ width:'100%', padding:10 }} />
-
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginTop:12 }}>
-          <div>
-            <label style={{ display:'block', fontWeight:'bold' }}>Suburb</label>
-            <input value={suburb} onChange={e=>setSuburb(e.target.value)} style={{ width:'100%', padding:10 }} />
-          </div>
-          <div>
-            <label style={{ display:'block', fontWeight:'bold' }}>State</label>
-            <select value={state} onChange={e=>setState(e.target.value)} style={{ width:'100%', padding:10 }}>
-              <option value="VIC">VIC</option><option value="NSW">NSW</option><option value="QLD">QLD</option>
-              <option value="SA">SA</option><option value="WA">WA</option><option value="TAS">TAS</option>
-            </select>
-          </div>
-        </div>
-
-        <div style={{ marginTop:12 }}>
-          <label style={{ display:'block', fontWeight:'bold' }}>Cladding</label>
-          <select value={cladding} onChange={e=>setCladding(e.target.value)} style={{ width:'100%', padding:10 }}>
-            <option value="Colourbond">Colourbond</option>
-            <option value="Zincalume">Zincalume</option>
-            <option value="Other">Other Metal</option>
-          </select>
-        </div>
-
-        <div style={{ marginTop:12 }}>
-          <label style={{ display:'block', fontWeight:'bold' }}>Treatment Options</label>
-          <label style={{ marginRight:16 }}>
-            <input type="checkbox" checked={options.includes('roof')}
-              onChange={e=> setOptions(e.target.checked? [...options,'roof'] : options.filter(o=>o!=='roof')) }/> Roof
-          </label>
-          <label>
-            <input type="checkbox" checked={options.includes('walls')}
-              onChange={e=> setOptions(e.target.checked? [...options,'walls'] : options.filter(o=>o!=='walls')) }/> Walls
-          </label>
-        </div>
-
-        <button onClick={handleGenerate} disabled={loading}
-          style={{ marginTop:16, padding:'12px 24px', background:'#007bff', color:'#fff', border:'none', borderRadius:4, cursor:'pointer' }}>
-          {loading ? 'Generating...' : 'Generate'}
+      <section className="grid gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <label className="flex flex-col gap-2 text-sm text-slate-700">
+          <span className="font-medium">Customer Notes (optional)</span>
+          <textarea
+            rows={4}
+            value={notes}
+            onChange={(event) => setNotes(event.target.value)}
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-500/30"
+          />
+        </label>
+        <label className="flex flex-col gap-2 text-sm text-slate-700">
+          <span className="font-medium">Internal Feedback (optional)</span>
+          <textarea
+            rows={3}
+            value={feedback}
+            onChange={(event) => setFeedback(event.target.value)}
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-500/30"
+          />
+        </label>
+        <button
+          type="button"
+          onClick={handleGenerate}
+          disabled={loading}
+          className="w-fit rounded-lg bg-indigo-600 px-5 py-2 text-sm font-medium text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:bg-indigo-300"
+        >
+          {loading ? 'Generating…' : 'Generate variants'}
         </button>
-      </div>
+        {error && <p className="text-sm text-rose-600">{error}</p>}
+      </section>
 
       {output && (
-        <div style={{ border:'1px solid #ddd', padding:16, borderRadius:8 }}>
-          <h2>Benefits</h2>
-          <pre style={{ whiteSpace:'pre-wrap', background:'#f9f9f9', padding:12 }}>{output.benefits}</pre>
-
-          {output.comparison && (
-            <>
-              <h3>Comparison</h3>
-              <pre style={{ whiteSpace:'pre-wrap', background:'#f9f9f9', padding:12 }}>{output.comparison}</pre>
-            </>
-          )}
-
-          {output.objections && (
-            <>
-              <h3>Objections</h3>
-              <pre style={{ whiteSpace:'pre-wrap', background:'#f9f9f9', padding:12 }}>{output.objections}</pre>
-            </>
-          )}
-
-          <div style={{ marginTop:16, background:'#fff3cd', padding:12, borderRadius:8 }}>
-            <strong>Provide Feedback</strong>
-            <textarea rows={3} value={feedbackText} onChange={e=>setFeedbackText(e.target.value)} style={{ width:'100%', padding:10, marginTop:8 }} />
-            <button onClick={handleFeedbackSubmit} disabled={!feedbackText.trim() || loading}
-              style={{ marginTop:8, padding:'10px 20px', background:'#28a745', color:'#fff', border:'none', borderRadius:4, cursor:'pointer' }}>
-              {loading ? 'Applying...' : 'Apply & Regenerate'}
-            </button>
+        <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div>
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Variants</h2>
+            <ul className="mt-2 list-disc space-y-2 pl-5 text-slate-800">
+              {(output.variants.length > 0 ? output.variants : DEFAULT_SALES_VARIANTS).map((variant, index) => (
+                <li key={`variant-${index}`}>{variant}</li>
+              ))}
+            </ul>
           </div>
-
-          <div style={{ marginTop:12, padding:10, background:'#e9ecef', borderRadius:4, fontSize:12 }}>
-            <strong>Meta:</strong> Snippets used: {output.meta.snippets_used.join(', ')}
-            {output.meta.feedback_used && ` | Applied feedback: ${output.meta.feedback_ids.join(', ')}`}
+          <div>
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Closing</h2>
+            <p className="mt-2 text-slate-800">{output.closing || DEFAULT_SALES_CLOSING}</p>
           </div>
-        </div>
+        </section>
       )}
     </div>
   );
 };
+
 export default SalesPanel;

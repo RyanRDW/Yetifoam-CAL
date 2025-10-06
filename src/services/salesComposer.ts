@@ -1,114 +1,117 @@
-import { ComposeInput, ComposeOutput, KBSnippet } from "../types/sales.types";
-import { scenarioDetector } from "./scenarioDetector";
-import { feedbackProcessor } from "./feedbackProcessor";
-import { llmPlanner } from "./llmPlanner";
-import { feedbackStore } from "../state/feedbackStore";
-import { salesLog } from "../state/salesLog";
-import benefitsData from "../data/salesKB/benefits.json";
-import comparisonsData from "../data/salesKB/comparisons.json";
+import { formSchema, type FormState, type ValidFormState } from '../state/formSchema';
 
-export async function composePitch(input: ComposeInput): Promise<ComposeOutput> {
-  await feedbackProcessor.initialize();
+export type SalesResponse = {
+  variants: string[];
+  closing: string;
+};
 
-  const scenario = scenarioDetector.detect(input);
-  const relevantFeedback = feedbackProcessor.getRelevantFeedback(scenario);
-  const globalOverrides = feedbackStore.getGlobalOverrides();
+export const DEFAULT_SALES_VARIANTS = [
+  'Basic package: Covers core areas efficiently.',
+  'Enhanced package: Includes member bands for durability.',
+];
 
-  const snippets = loadRelevantSnippets(scenario, input);
-  const systemPrompt = llmPlanner.buildSystemPrompt(
-    snippets,
-    input.calc_summary,
-    relevantFeedback,
-    globalOverrides
-  );
+export const DEFAULT_SALES_CLOSING = 'This solution ensures optimal insulation—ready to proceed?';
 
-  const userMessage = `Customer notes: "${input.customer_notes}"
-Generate cascading benefit bullets now.`;
+type SalesPayload = {
+  form: FormState | ValidFormState;
+  feedback?: Record<string, unknown>;
+};
 
-  const llmResponse = await llmPlanner.postLLM({
-    system: systemPrompt,
-    messages: [{ role: "user", content: userMessage }]
+export async function composeSales(payload: SalesPayload): Promise<SalesResponse> {
+  const validated = ensureValidForm(payload.form);
+  const body = {
+    form: validated,
+    feedback: payload.feedback ?? {},
+  };
+
+  const response = await fetch('/api/sales', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
   });
 
-  const output = parseLLMResponse(llmResponse, snippets, relevantFeedback);
-
-  await salesLog.append({
-    timestamp: new Date().toISOString(),
-    inputs_hash: salesLog.hashInput(input),
-    customer_notes: input.customer_notes,
-    materials: [input.calc_summary.materials.cladding].filter(Boolean),
-    options: input.calc_summary.options || [],
-    region: `${input.region.suburb}, ${input.region.state}`,
-    snippets_used: output.meta.snippets_used,
-    feedback_used: output.meta.feedback_used,
-    feedback_ids: output.meta.feedback_ids,
-    output_preview: (output.benefits || "").substring(0, 200) + "..."
-  });
-
-  return output;
-}
-
-function loadRelevantSnippets(scenario: any, input: ComposeInput): KBSnippet[] {
-  const detectedScenarios = scenario.detected_scenarios || [];
-  const materials = [input.calc_summary.materials.cladding].filter(Boolean);
-  let relevant: KBSnippet[] = [];
-
-  for (const benefit of (benefitsData as any).benefits) {
-    const materialMatch = benefit.material_trigger?.some((m: string) =>
-      materials.some(mat => mat.toLowerCase().includes(m.toLowerCase()))
-    );
-    const scenarioMatch = benefit.scenario_trigger?.some((s: string) =>
-      detectedScenarios.some((ds: string) => ds.includes(s) || s.includes(ds))
-    );
-    if (materialMatch || scenarioMatch) relevant.push(benefit as KBSnippet);
+  let data: unknown;
+  try {
+    data = await response.json();
+  } catch {
+    throw new Error('Sales composer response could not be parsed.');
   }
 
-  const competitor = scenarioDetector.detectCompetitor(input.customer_notes);
-  if (competitor) {
-    for (const comp of (comparisonsData as any).comparisons) {
-      if (comp.competitor === competitor || comp.competitor === "generic") {
-        relevant.push(comp as unknown as KBSnippet);
-      }
+  if (!response.ok) {
+    const message = extractErrorMessage(data) ?? 'Sales composer request failed.';
+    throw new Error(message);
+  }
+
+  const variants = normaliseVariants((data as any)?.variants);
+  const closing = normaliseString((data as any)?.closing) ?? DEFAULT_SALES_CLOSING;
+
+  return {
+    variants: variants.length > 0 ? variants : DEFAULT_SALES_VARIANTS,
+    closing,
+  };
+}
+
+export const composePitch = composeSales;
+
+function ensureValidForm(form: FormState | ValidFormState): ValidFormState {
+  const result = formSchema.safeParse(form);
+  if (!result.success) {
+    const message = result.error.issues[0]?.message ?? 'Complete all required inputs before generating variants.';
+    const error = new Error(message);
+    (error as Error & { issues?: typeof result.error.issues }).issues = result.error.issues;
+    throw error;
+  }
+  return result.data;
+}
+
+function normaliseVariants(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  const variants: string[] = [];
+  for (const entry of value) {
+    const text = normaliseString(entry);
+    if (text) {
+      variants.push(text);
     }
   }
-
-  const uniq = new Set<string>();
-  relevant = relevant.filter(s => !uniq.has(s.id) && (uniq.add(s.id), true)).slice(0, 20);
-  return relevant;
+  return variants;
 }
 
-function parseLLMResponse(
-  response: string,
-  snippets: KBSnippet[],
-  feedback: any[]
-): ComposeOutput {
-  try {
-    let jsonText = response;
-    const m = response.match(/```json\n([\s\S]*?)\n```/);
-    if (m) jsonText = m[1];
-    const parsed = JSON.parse(jsonText);
-    return {
-      meta: {
-        snippets_used: parsed.meta?.snippets_used || snippets.map(s => s.id),
-        feedback_used: !!parsed.meta?.feedback_used || feedback.length > 0,
-        feedback_ids: parsed.meta?.feedback_ids || feedback.map(f => f.id),
-        fallback_used: !!parsed.meta?.fallback_used
-      },
-      benefits: parsed.benefits || "",
-      comparison: parsed.comparison || "",
-      objections: parsed.objections || ""
-    };
-  } catch {
-    return {
-      meta: {
-        snippets_used: snippets.map(s => s.id),
-        feedback_used: feedback.length > 0,
-        feedback_ids: feedback.map(f => f.id),
-        fallback_used: true
-      },
-      benefits: response,
-      comparison: "",
-      objections: ""
-    };
+function normaliseString(value: unknown): string | null {
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : null;
   }
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return String(value);
+  }
+  if (Array.isArray(value)) {
+    const joined = value
+      .map((part) => normaliseString(part))
+      .filter((part): part is string => Boolean(part))
+      .join('\n');
+    return joined.length > 0 ? joined : null;
+  }
+  if (value && typeof value === 'object') {
+    const content = (value as Record<string, unknown>).content;
+    if (content) {
+      return normaliseString(content);
+    }
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
+function extractErrorMessage(payload: unknown): string | null {
+  if (!payload || typeof payload !== 'object') {
+    return null;
+  }
+  const record = payload as Record<string, unknown>;
+  const message = record.message ?? (record.error as Record<string, unknown> | undefined)?.message;
+  return typeof message === 'string' && message.trim().length > 0 ? message.trim() : null;
 }

@@ -1,42 +1,115 @@
-import { KBSnippet, CalcSummary, FeedbackEntry, GlobalOverride } from "../../src/types/sales.types";
-import { chat } from "../llm/openai";
-import salesRules from "../../src/state/salesRules";
+import OpenAI from 'openai';
+import { salesRules } from '../../src/state/salesRules';
 
-export class LLMPlanner {
-  buildSystem(
-    snippets: KBSnippet[],
-    calc: CalcSummary,
-    fb: FeedbackEntry[],
-    overrides: GlobalOverride[]
-  ): string {
-    let s = `You are the YetiFoam Sales Benefits Composer.\n\n=== CRITICAL OVERRIDES (HIGHEST PRIORITY) ===\n`;
-    if (fb.length) {
-      s += `\n**USER FEEDBACK OVERRIDES:**\n`;
-      for (const f of fb) {
-        s += `- [${f.priority.toUpperCase()}] ${f.user_feedback}\n`;
+const fallbackResponse = {
+  variants: [
+    'Standard foam application for this size.',
+    'Premium option with extra coverage.'
+  ],
+  closing: "Let's discuss the best fit for your shed."
+};
+
+const apiKey = process.env.OPENAI_API_KEY;
+const openai = apiKey ? new OpenAI({ apiKey }) : null;
+
+function stripCodeFence(raw: string): string {
+  let text = raw.trim();
+  if (text.startsWith('```')) {
+    text = text.replace(/^```(?:json)?/i, '');
+    const fence = text.lastIndexOf('```');
+    if (fence >= 0) text = text.slice(0, fence);
+  }
+  return text.trim();
+}
+
+function parseResponse(content: string | null | undefined): any | null {
+  if (!content) return null;
+  const primary = stripCodeFence(content);
+  try {
+    return JSON.parse(primary);
+  } catch (err) {
+    const match = primary.match(/\{[\s\S]*\}/);
+    if (match) {
+      try {
+        return JSON.parse(match[0]);
+      } catch (inner) {
+        console.error('planLLM JSON retry failed:', inner);
       }
     }
-    if (overrides.length) {
-      s += `\n**GLOBAL OVERRIDES:**\n`;
-      for (const o of overrides) s += `- [${o.priority.toUpperCase()}] ${o.rule}\n`;
-    }
-    s += `\n=== END CRITICAL OVERRIDES ===\n\nMISSION: Produce benefit bullets with embedded competitor comparisons. No email/SMS/call drafts.\n\nPRIMARY KNOWLEDGE BASE:\n\n`;
-    for (const sn of snippets) {
-      s += `[${sn.id}] ${sn.text}\n`;
-      if (sn.competitor_contrast) s += `   Comparison: ${sn.competitor_contrast}\n`;
-      s += `\n`;
-    }
-    s += `\nCUSTOMER SHED DETAILS:\n- Materials: ${calc.materials.cladding} ; ${calc.materials.members.join(", ")}\n- Options: ${calc.options.join(", ") || "full shed"}\n- Dimensions: ${calc.dimensions.L}x${calc.dimensions.W}x${calc.dimensions.H} m\n\n`;
-    s += `RULES:\n1) Apply feedback overrides first. 2) Cascading chains 3–6 levels. 3) Embed competitor comparisons. 4) Mention thermal bridging / structural / condensation triad. 5) 4-products vs 1-product where relevant. 6) Bullets only. No opening/closing. 7) Return JSON exactly as below. 8) DO NOT include email/SMS/call fields.\n\nOUTPUT FORMAT (JSON ONLY):\n{\n  "meta": {\n    "snippets_used": ["BEN001"],\n    "feedback_used": ${fb.length > 0},\n    "feedback_ids": [${fb.map(f => `"${f.id}"`).join(", ")}],\n    "fallback_used": false\n  },\n  "benefits": "<markdown bullets>",\n  "comparison": "<competitor analysis bullets>",\n  "objections": "<rebuttal bullets>"\n}\n\nTONE: ${salesRules.tone.style}\nFORBIDDEN: ${salesRules.tone.forbidden.join(", ")}\nBEGIN.`;
-    return s;
-  }
-
-  async complete(system: string, userContent: string, maxTokens = 1200): Promise<string> {
-    return await chat({
-      system,
-      messages: [{ role: "user", content: userContent }],
-      maxTokens
-    });
+    console.error('planLLM JSON parse error:', err);
+    return null;
   }
 }
-export const llmPlanner = new LLMPlanner();
+
+function toStringValue(value: unknown): string | null {
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : null;
+  }
+  if (typeof value === 'number') return String(value);
+  if (Array.isArray(value)) {
+    const parts = value
+      .map((part) => toStringValue(part))
+      .filter((part): part is string => Boolean(part));
+    return parts.length > 0 ? parts.join('\n') : null;
+  }
+  if (value && typeof value === 'object') {
+    const maybeContent = (value as Record<string, unknown>).content;
+    if (typeof maybeContent === 'string' || Array.isArray(maybeContent)) {
+      return toStringValue(maybeContent);
+    }
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
+function toVariantArray(value: unknown): string[] {
+  if (!Array.isArray(value)) return fallbackResponse.variants;
+  const variants = value
+    .map((entry) => toStringValue(entry))
+    .filter((entry): entry is string => Boolean(entry));
+  return variants.length > 0 ? variants : fallbackResponse.variants;
+}
+
+export async function planLLM(form: unknown = {}, feedback: unknown = {}) {
+  if (!openai) {
+    console.warn('planLLM fallback: OPENAI_API_KEY not set');
+    return fallbackResponse;
+  }
+
+  const model = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+  const messages = [
+    {
+      role: 'system' as const,
+      content: `You are a sales advisor for YetiFoam shed insulation. Use these rules: ${JSON.stringify(salesRules)}. Generate 2-3 variants and a closing tailored to the provided configuration and feedback.`
+    },
+    {
+      role: 'user' as const,
+      content: `Configuration: ${JSON.stringify(form || {})}\nFeedback: ${JSON.stringify(feedback || {})}\nReturn JSON only (no markdown fences) shaped as { "variants": ["Variant 1"], "closing": "Close" }.\nEach variants entry must be a plain string without embedded JSON or objects.\nThe closing must be a single plain string.`
+    }
+  ];
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model,
+      messages,
+    });
+
+    const parsed = parseResponse(completion.choices?.[0]?.message?.content);
+    if (!parsed) throw new Error('Invalid response payload');
+
+    const variants = toVariantArray(parsed?.variants);
+    const closing = toStringValue(parsed?.closing) ?? fallbackResponse.closing;
+
+    return { variants, closing };
+  } catch (error) {
+    console.error('planLLM OpenAI error:', error);
+    return fallbackResponse;
+  }
+}
+
+export default planLLM;

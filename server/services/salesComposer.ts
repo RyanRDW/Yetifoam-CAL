@@ -1,88 +1,115 @@
-import { ComposeInput, ComposeOutput, KBSnippet } from "../../src/types/sales.types";
-import { scenarioDetector } from "../../src/services/scenarioDetector";
-import { feedbackProcessor } from "./feedbackProcessor";
-import { llmPlanner } from "./llmPlanner";
-import { salesLog } from "../state/salesLog";
-import benefitsData from "../../src/data/salesKB/benefits.json";
-import comparisonsData from "../../src/data/salesKB/comparisons.json";
-import { feedbackStore } from "../state/feedbackStore";
+import OpenAI from 'openai';
+import { salesRules } from '../../src/state/salesRules';
 
-export async function composePitchServer(input: ComposeInput): Promise<ComposeOutput> {
-  await feedbackProcessor.init();
-  const scen = scenarioDetector.detect(input);
-  const fb = feedbackProcessor.relevant(scen);
-  const overrides = feedbackStore.getOverrides();
+const fallbackResponse = {
+  variants: [
+    'Basic package: Covers core areas efficiently.',
+    'Enhanced package: Includes member bands for durability.'
+  ],
+  closing: 'This solution ensures optimal insulation—ready to proceed?'
+};
 
-  const snippets = pickSnippets(scen, input);
-  const system = llmPlanner.buildSystem(snippets, input.calc_summary, fb, overrides);
-  const userMsg = `Customer notes: "${input.customer_notes}". Generate cascading benefit bullets now.`;
+const apiKey = process.env.OPENAI_API_KEY;
+const openai = apiKey ? new OpenAI({ apiKey }) : null;
 
-  const raw = await llmPlanner.complete(system, userMsg, 1400);
-  const out = parseLLM(raw, snippets, fb);
-
-  await salesLog.append({
-    timestamp: new Date().toISOString(),
-    inputs_hash: salesLog.hashInput(input),
-    customer_notes: input.customer_notes,
-    materials: [input.calc_summary.materials.cladding].filter(Boolean),
-    options: input.calc_summary.options || [],
-    region: `${input.region.suburb}, ${input.region.state}`,
-    snippets_used: out.meta.snippets_used,
-    feedback_used: out.meta.feedback_used,
-    feedback_ids: out.meta.feedback_ids,
-    output_preview: (out.benefits || "").slice(0, 200) + "..."
-  });
-
-  return out;
+function stripCodeFence(raw: string): string {
+  let text = raw.trim();
+  if (text.startsWith('```')) {
+    text = text.replace(/^```(?:json)?/i, '');
+    const fence = text.lastIndexOf('```');
+    if (fence >= 0) text = text.slice(0, fence);
+  }
+  return text.trim();
 }
 
-function pickSnippets(scen: any, input: ComposeInput): KBSnippet[] {
-  const detected = scen.detected_scenarios || [];
-  const mats = [input.calc_summary.materials.cladding].filter(Boolean);
-  const benefits = (benefitsData as any).benefits as KBSnippet[];
-  const comps = (comparisonsData as any).comparisons as any[];
-
-  let rel: KBSnippet[] = [];
-  for (const b of benefits) {
-    const m = (b.material_trigger || []).some(mt => mats.some(x => (x||"").toLowerCase().includes(mt.toLowerCase())));
-    const s = (b.scenario_trigger || []).some(st => detected.some(d => d.includes(st) || st.includes(d)));
-    if (m || s) rel.push(b);
-  }
-  const compName = scenarioDetector.detectCompetitor(input.customer_notes);
-  if (compName) {
-    for (const c of comps) if (c.competitor === compName || c.competitor === "generic") rel.push(c as any as KBSnippet);
-  }
-  const seen = new Set<string>();
-  return rel.filter(x => !seen.has(x.id) && seen.add(x.id)).slice(0, 20);
-}
-
-function parseLLM(raw: string, snippets: KBSnippet[], fb: any[]): ComposeOutput {
+function parseResponse(content: string | null | undefined): any | null {
+  if (!content) return null;
+  const primary = stripCodeFence(content);
   try {
-    let txt = raw;
-    const m = raw.match(/```json\s*([\s\S]*?)```/); if (m) txt = m[1];
-    const j = JSON.parse(txt);
-    return {
-      meta: {
-        snippets_used: j.meta?.snippets_used || snippets.map(s => s.id),
-        feedback_used: !!fb.length,
-        feedback_ids: fb.map((x: any) => x.id),
-        fallback_used: !!j.meta?.fallback_used
-      },
-      benefits: j.benefits || "",
-      comparison: j.comparison || "",
-      objections: j.objections || ""
-    };
-  } catch {
-    return {
-      meta: {
-        snippets_used: snippets.map(s => s.id),
-        feedback_used: !!fb.length,
-        feedback_ids: fb.map((x: any) => x.id),
-        fallback_used: true
-      },
-      benefits: raw,
-      comparison: "",
-      objections: ""
-    };
+    return JSON.parse(primary);
+  } catch (err) {
+    const match = primary.match(/\{[\s\S]*\}/);
+    if (match) {
+      try {
+        return JSON.parse(match[0]);
+      } catch (inner) {
+        console.error('composeSales JSON retry failed:', inner);
+      }
+    }
+    console.error('composeSales JSON parse error:', err);
+    return null;
   }
 }
+
+function toStringValue(value: unknown): string | null {
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : null;
+  }
+  if (typeof value === 'number') return String(value);
+  if (Array.isArray(value)) {
+    const parts = value
+      .map((part) => toStringValue(part))
+      .filter((part): part is string => Boolean(part));
+    return parts.length > 0 ? parts.join('\n') : null;
+  }
+  if (value && typeof value === 'object') {
+    const maybeContent = (value as Record<string, unknown>).content;
+    if (typeof maybeContent === 'string' || Array.isArray(maybeContent)) {
+      return toStringValue(maybeContent);
+    }
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
+function toVariantArray(value: unknown): string[] {
+  if (!Array.isArray(value)) return fallbackResponse.variants;
+  const variants = value
+    .map((entry) => toStringValue(entry))
+    .filter((entry): entry is string => Boolean(entry));
+  return variants.length > 0 ? variants : fallbackResponse.variants;
+}
+
+export async function composeSales(form: unknown = {}, feedback: unknown = {}) {
+  if (!openai) {
+    console.warn('composeSales fallback: OPENAI_API_KEY not set');
+    return fallbackResponse;
+  }
+
+  const model = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+  const messages = [
+    {
+      role: 'system' as const,
+      content: `You are crafting persuasive sales copy for YetiFoam using these rules: ${JSON.stringify(salesRules)}. Produce 2-3 concise variants and a compelling closing statement.`
+    },
+    {
+      role: 'user' as const,
+      content: `Shed configuration: ${JSON.stringify(form || {})}\nFeedback: ${JSON.stringify(feedback || {})}\nReturn JSON only (no markdown fences) shaped as { "variants": ["Variant 1"], "closing": "Close" }.\nEach variants entry must be a plain string without embedded JSON or objects.\nThe closing must be a single plain string.`
+    }
+  ];
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model,
+      messages,
+    });
+
+    const parsed = parseResponse(completion.choices?.[0]?.message?.content);
+    if (!parsed) throw new Error('Invalid response payload');
+
+    const variants = toVariantArray(parsed?.variants);
+    const closing = toStringValue(parsed?.closing) ?? fallbackResponse.closing;
+
+    return { variants, closing };
+  } catch (error) {
+    console.error('composeSales OpenAI error:', error);
+    return fallbackResponse;
+  }
+}
+
+export default composeSales;

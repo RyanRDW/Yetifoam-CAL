@@ -1,6 +1,7 @@
 import { PanelGroup, Panel, PanelResizeHandle } from 'react-resizable-panels';
 import { InputPanel } from '../components/InputPanel';
 import ExportPanel from '../components/export/ExportPanel';
+import { AiAdvisorPanel } from '../components/AiAdvisorPanel';
 import { useLayout } from '../state/LayoutContext';
 import { ResultsPanel } from '../results/components/ResultsPanel';
 import '../styles/panels.css';
@@ -38,8 +39,13 @@ export default function AppShell() {
           </Panel>
           <PanelResizeHandle className="yf-handle-y" />
           <Panel defaultSize={rightStack[1]} minSize={20} maxSize={65}>
-            <div className="flex h-full flex-col bg-white p-4 shadow-inner transition-all duration-500">
-              <ExportPanel />
+            <div className="flex h-full flex-col gap-4 bg-white p-4 shadow-inner transition-all duration-500">
+              <div className="h-[340px]">
+                <AiAdvisorPanel />
+              </div>
+              <div className="flex-1 overflow-y-auto rounded-2xl border border-slate-200 bg-white/80 p-4">
+                <ExportPanel />
+              </div>
             </div>
           </Panel>
         </PanelGroup>

@@ -17,5 +17,4 @@ const server = createServer(async (req, res) => {
   }
 });
 
-const port = process.env.PORT ? Number(process.env.PORT) : 8787;
-server.listen(port, () => { console.log(`[server] http://localhost:${port}`); });
+server.listen(process.env.PORT || 8787, () => console.log('Server on ' + (process.env.PORT || 8787)));
