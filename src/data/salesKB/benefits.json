@@ -1,0 +1,533 @@
+{
+  "benefits": [
+    {
+      "id": "BEN001",
+      "topic": "Thermal_Bridging_Elimination",
+      "material_trigger": [
+        "metal roof",
+        "colourbond",
+        "metal wall",
+        "zincalume"
+      ],
+      "scenario_trigger": [
+        "hot workshop",
+        "summer heat",
+        "inefficient",
+        "energy"
+      ],
+      "text": "YetiFoam eliminates up to 40% insulation performance loss from thermal bridging by providing a continuous adhered layer over all metal surfaces.",
+      "cascade_to": [
+        "BEN002",
+        "COM004"
+      ],
+      "competitor_contrast": "Fibreglass batts + building wrap still lose 40% efficiency due to bridging\u2014requiring 4 separate products that fail to address the core issue.",
+      "data_source": "Verified claims registry",
+      "tags": [
+        "thermal",
+        "efficiency",
+        "metal",
+        "bridging"
+      ]
+    },
+    {
+      "id": "BEN002",
+      "topic": "Radiant_Heat_Elimination",
+      "material_trigger": [
+        "colourbond",
+        "metal roof",
+        "zincalume"
+      ],
+      "scenario_trigger": [
+        "hot workshop",
+        "summer",
+        "heat",
+        "32 degree"
+      ],
+      "text": "On a 32\u00b0C day, the average Victorian roof surface hits 71\u00b0C. YetiFoam completely eliminates this external temperature impact by blocking radiant heat gain.",
+      "cascade_to": [
+        "BEN001",
+        "COM002"
+      ],
+      "competitor_contrast": "Anti-con blanket provides negligible radiant heat reduction\u2014less than 5%\u2014while YetiFoam eliminates it entirely. Fibreglass insulation offers virtually zero benefit under metal roofs.",
+      "data_source": "Verified claims registry #47",
+      "tags": [
+        "radiant",
+        "heat",
+        "summer",
+        "colourbond",
+        "anti-con"
+      ]
+    },
+    {
+      "id": "BEN003",
+      "topic": "Structural_Resistance_Boost",
+      "material_trigger": [
+        "metal wall",
+        "stud wall",
+        "steel frame",
+        "timber frame"
+      ],
+      "scenario_trigger": [
+        "wind",
+        "structural",
+        "strength",
+        "durability"
+      ],
+      "text": "YetiFoam boosts structural resistance in stud walls by up to 124%, ideal for metal frame walls in sheds.",
+      "cascade_to": [
+        "BEN004",
+        "BEN014"
+      ],
+      "competitor_contrast": "Fibreglass provides no structural enhancement whatsoever.",
+      "data_source": "Verified claims registry",
+      "tags": [
+        "structural",
+        "walls",
+        "strength",
+        "wind"
+      ]
+    },
+    {
+      "id": "BEN004",
+      "topic": "Wind_Uplift_Resistance",
+      "material_trigger": [
+        "roof",
+        "colourbond",
+        "metal roof"
+      ],
+      "scenario_trigger": [
+        "wind",
+        "storm",
+        "environment",
+        "high wind"
+      ],
+      "text": "YetiFoam increases wind uplift resistance by up to 300% in shed roofs.",
+      "cascade_to": [
+        "BEN003",
+        "BEN015"
+      ],
+      "competitor_contrast": "Foilboard offers partial coverage with negligible wind resistance enhancement.",
+      "data_source": "Verified claims registry",
+      "tags": [
+        "wind",
+        "roof",
+        "uplift",
+        "environment"
+      ]
+    },
+    {
+      "id": "BEN005",
+      "topic": "Leak_Prevention",
+      "material_trigger": [
+        "colourbond",
+        "roof",
+        "metal roof"
+      ],
+      "scenario_trigger": [
+        "leak",
+        "water",
+        "rain",
+        "moisture"
+      ],
+      "text": "YetiFoam eliminates roof leak risks without replacing roofs or flashings on Colourbond sheds by forming a seamless, fully adhered waterproof membrane.",
+      "cascade_to": [
+        "BEN006",
+        "BEN016"
+      ],
+      "competitor_contrast": "Anti-con blanket degrades over time with leaks, unlike YetiFoam's 97.6% 25-year leak-free rate.",
+      "data_source": "Verified claims registry",
+      "tags": [
+        "leak",
+        "waterproof",
+        "roof",
+        "colourbond"
+      ]
+    },
+    {
+      "id": "BEN006",
+      "topic": "Longevity_25_Years",
+      "material_trigger": [
+        "roof",
+        "walls",
+        "metal"
+      ],
+      "scenario_trigger": [
+        "durability",
+        "long term",
+        "warranty",
+        "forever",
+        "lifetime"
+      ],
+      "text": "YetiFoam achieves 97.6% leak-free performance over 25 years in roof applications, with 93% showing less than 1% degradation.",
+      "cascade_to": [
+        "BEN005",
+        "BEN007"
+      ],
+      "competitor_contrast": "Competitors degrade significantly, requiring replacement cycles that YetiFoam eliminates entirely.",
+      "data_source": "Kashiwagi 25-year study",
+      "tags": [
+        "longevity",
+        "25years",
+        "degradation",
+        "warranty"
+      ]
+    },
+    {
+      "id": "BEN007",
+      "topic": "Condensation_Elimination",
+      "material_trigger": [
+        "metal roof",
+        "colourbond",
+        "metal wall"
+      ],
+      "scenario_trigger": [
+        "condensation",
+        "moisture",
+        "damp",
+        "humidity"
+      ],
+      "text": "YetiFoam completely eliminates condensation in sheds by creating a continuous thermal break, acting as a Class II vapour barrier (upgradeable to Class I at 75mm).",
+      "cascade_to": [
+        "BEN008",
+        "COM003"
+      ],
+      "competitor_contrast": "Fibreglass batts + building wrap fail to prevent condensation on metal surfaces\u2014YetiFoam eliminates moisture risks entirely.",
+      "data_source": "Verified claims registry",
+      "tags": [
+        "condensation",
+        "vapour_barrier",
+        "moisture",
+        "thermal_break"
+      ]
+    },
+    {
+      "id": "BEN008",
+      "topic": "Monolithic_Structure",
+      "material_trigger": [
+        "walls",
+        "roof",
+        "full shed"
+      ],
+      "scenario_trigger": [
+        "partial treatment",
+        "roof only",
+        "full coverage"
+      ],
+      "text": "YetiFoam creates a single monolithic leak-proof structure by encasing all members and shell.",
+      "cascade_to": [
+        "BEN007",
+        "BEN009"
+      ],
+      "competitor_contrast": "Partial treatments 'manage' condensation by hiding it. YetiFoam eliminates it by sealing everything into one continuous system.",
+      "data_source": "Engineering principles",
+      "tags": [
+        "monolithic",
+        "full_treatment",
+        "sealed"
+      ]
+    },
+    {
+      "id": "BEN009",
+      "topic": "Wall_Performance_vs_Fibreglass",
+      "material_trigger": [
+        "metal wall",
+        "wall"
+      ],
+      "scenario_trigger": [
+        "insulation",
+        "efficiency",
+        "batts"
+      ],
+      "text": "YetiFoam achieves 30% better performance in shed walls than fibreglass, even without considering air-sealing factors.",
+      "cascade_to": [
+        "BEN001",
+        "COM001"
+      ],
+      "competitor_contrast": "Fibreglass batts with building wrap show 20-30% less efficiency in walls than YetiFoam, ignoring air gaps.",
+      "data_source": "Verified claims registry",
+      "tags": [
+        "walls",
+        "fibreglass",
+        "performance",
+        "efficiency"
+      ]
+    },
+    {
+      "id": "BEN010",
+      "topic": "Fastener_Coverage",
+      "material_trigger": [
+        "metal roof",
+        "metal wall"
+      ],
+      "scenario_trigger": [
+        "thermal bridging",
+        "efficiency",
+        "fasteners"
+      ],
+      "text": "YetiFoam covers fasteners and penetrations fully, blocking thermal bridging pathways that reduce insulation effectiveness by up to 31.5%.",
+      "cascade_to": [
+        "BEN001",
+        "BEN007"
+      ],
+      "data_source": "Verified claims registry",
+      "tags": [
+        "fasteners",
+        "thermal_bridging",
+        "penetrations"
+      ]
+    },
+    {
+      "id": "BEN011",
+      "topic": "Zero_Fibreglass_Benefit_Metal_Roof",
+      "material_trigger": [
+        "metal roof",
+        "colourbond"
+      ],
+      "scenario_trigger": [
+        "fibreglass",
+        "batts",
+        "insulation"
+      ],
+      "text": "Fibreglass insulation offers virtually zero benefit under metal roofs, unlike YetiFoam's full performance.",
+      "cascade_to": [
+        "BEN002"
+      ],
+      "competitor_contrast": "Standard insulation specs don't cover thermal bridging, structural enhancement, or condensation elimination.",
+      "data_source": "Verified claims registry",
+      "tags": [
+        "fibreglass",
+        "metal_roof",
+        "zero_benefit"
+      ]
+    },
+    {
+      "id": "BEN012",
+      "topic": "Wind_Gust_Resistance",
+      "material_trigger": [
+        "roof",
+        "walls"
+      ],
+      "scenario_trigger": [
+        "wind",
+        "storm",
+        "environment"
+      ],
+      "text": "YetiFoam withstands wind gusts 34% higher than Melbourne's record, with zero damage.",
+      "cascade_to": [
+        "BEN004",
+        "BEN003"
+      ],
+      "data_source": "Verified claims registry",
+      "tags": [
+        "wind",
+        "gusts",
+        "melbourne",
+        "environment"
+      ]
+    },
+    {
+      "id": "BEN013",
+      "topic": "Brace_Energy_Dissipation",
+      "material_trigger": [
+        "walls",
+        "steel frame"
+      ],
+      "scenario_trigger": [
+        "structural",
+        "compliance",
+        "AS4100"
+      ],
+      "text": "YetiFoam enhances brace energy dissipation by up to 191%, maintaining compliance with AS 4100.",
+      "cascade_to": [
+        "BEN003"
+      ],
+      "data_source": "Verified claims registry",
+      "tags": [
+        "bracing",
+        "energy_dissipation",
+        "AS4100",
+        "compliance"
+      ]
+    },
+    {
+      "id": "BEN014",
+      "topic": "Racking_Resistance",
+      "material_trigger": [
+        "walls"
+      ],
+      "scenario_trigger": [
+        "wind",
+        "structural",
+        "bracing"
+      ],
+      "text": "YetiFoam increases wall racking resistance to meet wind-load needs, reducing need for supplementary fixings.",
+      "cascade_to": [
+        "BEN003",
+        "BEN004"
+      ],
+      "data_source": "Verified claims registry",
+      "tags": [
+        "racking",
+        "walls",
+        "wind_load",
+        "bracing"
+      ]
+    },
+    {
+      "id": "BEN015",
+      "topic": "Thermal_Shock_Elimination",
+      "material_trigger": [
+        "metal roof",
+        "metal wall"
+      ],
+      "scenario_trigger": [
+        "degradation",
+        "expansion",
+        "corrosion"
+      ],
+      "text": "YetiFoam eliminates thermal shock expansion, preventing structural degradation and corrosion in sheds.",
+      "cascade_to": [
+        "BEN006",
+        "BEN005"
+      ],
+      "data_source": "Verified claims registry",
+      "tags": [
+        "thermal_shock",
+        "expansion",
+        "corrosion",
+        "degradation"
+      ]
+    },
+    {
+      "id": "BEN016",
+      "topic": "Seamless_Waterproof_Membrane",
+      "material_trigger": [
+        "roof",
+        "colourbond"
+      ],
+      "scenario_trigger": [
+        "leak",
+        "waterproof",
+        "rain"
+      ],
+      "text": "YetiFoam forms a seamless, fully adhered waterproof membrane, preventing water penetration and lateral travel.",
+      "cascade_to": [
+        "BEN005",
+        "BEN006"
+      ],
+      "data_source": "Verified claims registry",
+      "tags": [
+        "waterproof",
+        "membrane",
+        "seamless",
+        "leak"
+      ]
+    },
+    {
+      "id": "BEN017",
+      "topic": "Air_Barrier_Elimination",
+      "material_trigger": [
+        "walls",
+        "roof",
+        "metal"
+      ],
+      "scenario_trigger": [
+        "air leakage",
+        "drafts",
+        "efficiency"
+      ],
+      "text": "YetiFoam creates a seamless air barrier eliminating leaks entirely.",
+      "cascade_to": [
+        "BEN001",
+        "BEN009"
+      ],
+      "competitor_contrast": "Fibreglass batts provide negligible insulation under metal roofs due to air gaps.",
+      "data_source": "Verified claims registry",
+      "tags": [
+        "air_barrier",
+        "air_leakage",
+        "gaps",
+        "fibreglass"
+      ]
+    },
+    {
+      "id": "BEN018",
+      "topic": "Installation_Gap_Elimination",
+      "material_trigger": [
+        "walls",
+        "roof"
+      ],
+      "scenario_trigger": [
+        "installation",
+        "coverage",
+        "gaps"
+      ],
+      "text": "YetiFoam sprays as a monolithic layer, eliminating installation gaps and enhancing structural resistance.",
+      "cascade_to": [
+        "BEN003",
+        "BEN008"
+      ],
+      "competitor_contrast": "Gaps in fibreglass batts + building wrap lead to inconsistent coverage and energy loss.",
+      "data_source": "Verified claims registry",
+      "tags": [
+        "installation",
+        "gaps",
+        "coverage",
+        "monolithic"
+      ]
+    },
+    {
+      "id": "BEN019",
+      "topic": "R_Value_Retention",
+      "material_trigger": [
+        "walls",
+        "roof",
+        "metal"
+      ],
+      "scenario_trigger": [
+        "efficiency",
+        "thermal bridging",
+        "insulation"
+      ],
+      "text": "YetiFoam maintains R-value by covering thermal bridges\u2014fasteners in fibreglass installs can reduce effectiveness by up to 31.5%.",
+      "cascade_to": [
+        "BEN001",
+        "BEN010"
+      ],
+      "competitor_contrast": "Thermal bridging in fibreglass setups can eliminate up to 40% performance.",
+      "data_source": "Verified claims registry",
+      "tags": [
+        "r_value",
+        "efficiency",
+        "thermal_bridging",
+        "fasteners"
+      ]
+    },
+    {
+      "id": "BEN020",
+      "topic": "Single_Product_Solution",
+      "material_trigger": [
+        "walls",
+        "metal"
+      ],
+      "scenario_trigger": [
+        "batts",
+        "multi-product",
+        "complexity"
+      ],
+      "text": "Batts on metal require 4 products (wall, vapor barrier, wrap, batts). YetiFoam does it with 1 seamless application.",
+      "cascade_to": [
+        "BEN008",
+        "COM001"
+      ],
+      "competitor_contrast": "Complexity drives failure and deniability in alternatives.",
+      "data_source": "Industry analysis",
+      "tags": [
+        "single_product",
+        "multi_product",
+        "batts",
+        "complexity"
+      ]
+    }
+  ]
+}

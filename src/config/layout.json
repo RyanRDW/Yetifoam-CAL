@@ -1,0 +1,40 @@
+{
+  "layouts": {
+    "input_mode": {
+      "type": "split_horizontal",
+      "left": {"component": "InputPanel", "width_percent": 40},
+      "right": {"component": "RightPanelStack", "width_percent": 60,
+        "panels": [
+          {"id": "LivePreview", "state": "expanded", "height_percent": 70},
+          {"id": "Results", "state": "minimized", "height_percent": 10},
+          {"id": "SalesInsights", "state": "minimized", "height_percent": 10},
+          {"id": "Help", "state": "minimized", "height_percent": 10}
+        ]
+      }
+    },
+    "results_mode": {
+      "type": "split_horizontal",
+      "left": {"component": "InputPanel", "width_percent": 25, "sections_collapsed": true},
+      "right": {"component": "RightPanelStack", "width_percent": 75,
+        "panels": [
+          {"id": "Results", "state": "expanded", "height_percent": 40},
+          {"id": "SalesInsights", "state": "expanded", "height_percent": 35},
+          {"id": "LivePreview", "state": "minimized", "height_percent": 10},
+          {"id": "Help", "state": "minimized", "height_percent": 15}
+        ]
+      }
+    }
+  },
+  "animation_timings": {
+    "section_collapse_delay": 300,
+    "section_collapse_duration": 200,
+    "panel_expand_duration": 400,
+    "calculate_sequence_total": 800,
+    "reflow_duration": 300
+  },
+  "constraints": {
+    "input_panel": {"min_width_percent": 20, "max_width_percent": 50},
+    "results_panel": {"min_height_percent": 30, "max_height_percent": 60},
+    "sales_panel": {"min_height_percent": 25, "max_height_percent": 60}
+  }
+}

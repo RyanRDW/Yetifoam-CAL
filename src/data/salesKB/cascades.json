@@ -1,0 +1,71 @@
+{
+  "cascades": [
+    {
+      "id": "CAS001",
+      "trigger": "partial_treatment_objection",
+      "chain": [
+        { "level": 1, "text": "YetiFoam encases all members and shell into one monolithic structure", "comparison": "vs. partial treatments that 'manage' condensation by hiding it" },
+        { "level": 2, "text": "→ Eliminates condensation pathways completely", "comparison": "vs. batts needing wall+vapor barrier+wrap+batts", "data": "Class II vapour barrier, upgradeable to Class I at 75mm" },
+        { "level": 3, "text": "→ Prevents corrosion and structural degradation from thermal shock" },
+        { "level": 4, "text": "→ 97.6% leak-free after 25 years" }
+      ],
+      "tags": ["monolithic", "condensation", "longevity"]
+    },
+    {
+      "id": "CAS002",
+      "trigger": "price_objection",
+      "chain": [
+        { "level": 1, "text": "If you spend $5K on alternatives, they won't deliver what you expect", "comparison": "Specs ignore bridging, structure, condensation" },
+        { "level": 2, "text": "→ Alternatives require 4 products and still fail", "data": "YetiFoam: 1 product" },
+        { "level": 3, "text": "→ Manufacturers don't install; deniability under real conditions" },
+        { "level": 4, "text": "→ YetiFoam performs for life; zero degradation trend" },
+        { "level": 5, "text": "→ Upfront higher, lifetime lower cost; plus structural + thermal + moisture wins" }
+      ],
+      "tags": ["price", "value", "longevity"]
+    },
+    {
+      "id": "CAS003",
+      "trigger": "hot_workshop",
+      "chain": [
+        { "level": 1, "text": "On 32°C days, Colourbond roof hits ~71°C; YetiFoam blocks radiant heat", "comparison": "Anti-con <5% reduction" },
+        { "level": 2, "text": "→ Eliminates 40% thermal bridging loss competitors ignore" },
+        { "level": 3, "text": "→ Continuous thermal break stabilizes interior" },
+        { "level": 4, "text": "→ Lower energy costs permanently" }
+      ],
+      "tags": ["hot_workshop", "radiant_heat"]
+    },
+    {
+      "id": "CAS004",
+      "trigger": "structural_concern",
+      "chain": [
+        { "level": 1, "text": "Boosts wall resistance (+124%) and wind uplift (+300%)", "comparison": "Batts add zero structure" },
+        { "level": 2, "text": "→ Withstands gusts 34% over Melbourne record" },
+        { "level": 3, "text": "→ Increases brace energy dissipation; AS 4100 compliant" },
+        { "level": 4, "text": "→ Eliminates thermal shock causing fastener wear" }
+      ],
+      "tags": ["structural", "wind"]
+    },
+    {
+      "id": "CAS005",
+      "trigger": "condensation_concern",
+      "chain": [
+        { "level": 1, "text": "Continuous thermal break eliminates condensation", "comparison": "Batts + wrap hide moisture" },
+        { "level": 2, "text": "→ Class II vapour barrier (Class I at 75mm)" },
+        { "level": 3, "text": "→ Covers penetrations; no pathways" },
+        { "level": 4, "text": "→ Prevents corrosion; long-term integrity" }
+      ],
+      "tags": ["condensation", "vapour_barrier"]
+    },
+    {
+      "id": "CAS006",
+      "trigger": "foilboard_comparison",
+      "chain": [
+        { "level": 1, "text": "Foilboard = 4 products vs YetiFoam = 1", "comparison": "Complexity → errors" },
+        { "level": 2, "text": "→ Ignores thermal bridging; YetiFoam restores efficiency" },
+        { "level": 3, "text": "→ Partial coverage; negligible wind resistance vs YetiFoam uplift boost" },
+        { "level": 4, "text": "→ 25-year performance record" }
+      ],
+      "tags": ["foilboard", "thermal_bridging"]
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+.yf-handle-x,
+.yf-handle-y {
+  background: transparent;
+  position: relative;
+}
+
+.yf-handle-x::after,
+.yf-handle-y::after {
+  content: "";
+  display: block;
+  background: #e5e7eb;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.yf-handle-x::after {
+  width: 4px;
+  height: 100%;
+}
+
+.yf-handle-y::after {
+  height: 4px;
+  width: 100%;
+}
+
+.yf-handle-x:hover::after,
+.yf-handle-y:hover::after {
+  background: #0066cc;
+  transform: scale(1.6);
+}

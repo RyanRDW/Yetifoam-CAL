@@ -1,0 +1,47 @@
+{
+  "spacing_presets": {
+    "roof": {
+      "corrugated": {
+        "top_hat": 1200,
+        "c_channel": 1500
+      },
+      "monoclad": {
+        "top_hat": 1500,
+        "c_channel": 1500
+      }
+    },
+    "walls": {
+      "top_hat": 1200,
+      "c_channel": 1200
+    }
+  },
+  "pitch_factors": {
+    "5": 1.004,
+    "10": 1.015,
+    "15": 1.035,
+    "22": 1.082,
+    "25": 1.103,
+    "30": 1.155
+  },
+  "cladding_factors": {
+    "corrugated": 1.2,
+    "monoclad": 1.0
+  },
+  "member_spray_widths": {
+    "roof_battens": 0.12,
+    "wall_purlins": 0.18,
+    "multiplier": 0.9
+  },
+  "openings_library": {
+    "single_roller": { "area": 5.04, "surface": "gable" },
+    "double_roller": { "area": 10.08, "surface": "gable" },
+    "high_roller": { "area": 9.0, "surface": "gable" },
+    "large_roller": { "area": 23.1, "surface": "gable" },
+    "pa_door": { "area": 1.67, "surface": "side" },
+    "window": { "area": 1.44, "surface": "side" },
+    "sliding_single": { "area": 4.41, "surface": "side" },
+    "sliding_double": { "area": 8.82, "surface": "side" },
+    "laserlight": { "width": 0.9, "surface": "roof" },
+    "custom": { "area": 1.0, "surface": "side" }
+  }
+}
