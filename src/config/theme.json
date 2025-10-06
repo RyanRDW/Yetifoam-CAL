@@ -1,0 +1,17 @@
+{
+  "spacing": {"xs": "4px", "sm": "8px", "md": "16px", "lg": "24px", "xl": "32px"},
+  "typography": {"base_size": "16px", "label_size": "14px", "heading_size": "24px", "small_size": "12px"},
+  "colors": {
+    "primary": "#0066CC", "secondary": "#6B7280", "success": "#10B981", "warning": "#F59E0B", "danger": "#EF4444",
+    "background": "#FFFFFF", "surface": "#F3F4F6", "border": "#E5E7EB"
+  },
+  "components": {
+    "pitch_tile": {"width": "160px", "height": "120px"},
+    "cladding_tile": {"width": "200px", "height": "150px"},
+    "member_tile": {"width": "120px", "height": "90px"},
+    "dimension_ref_image": {"width": "140px", "height": "100px"},
+    "calculate_button": {"height": "70px", "width": "100%"},
+    "minimized_tab": {"height": "40px"},
+    "drag_handle": {"width": "4px", "hover_width": "8px"}
+  }
+}

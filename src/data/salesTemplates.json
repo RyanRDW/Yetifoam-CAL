@@ -1,0 +1,5 @@
+{
+  "intro": "Hey {{name}}, thanks for sharing your shed details!",
+  "windFact": "Closed-cell foam locks in temperature control and shuts out drafts across harsh seasons.",
+  "closing": "Based on your setup, a {{foam_type}} application will deliver long-term savings and strength."
+}
