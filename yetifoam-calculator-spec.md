@@ -6,14 +6,14 @@ This specification captures the behaviour and architecture of the current YetiFo
 
 ## 1. Product Scope
 - Desktop-oriented estimator for YetiFoam sales staff to scope spray foam jobs on metal sheds.
-- Focus areas: accurate surface calculations, intuitive input workflow, persistent layout, and sales enablement tooling built on OpenAI-driven assistants.
+- Focus areas: accurate surface calculations, intuitive input workflow, persistent layout, and sales enablement tooling powered by xAI Grok.
 - Out of scope: PDFs, database persistence, automated quoting, historical environmental context.
 
 ## 2. Platform Architecture
 - **Frontend**: React 19 + TypeScript, bundled by Vite, styled with Tailwind CSS utility layer plus bespoke panel CSS.
 - **State**: `LayoutContext` provides global state (section expansion, panel sizes, calculation mode, form data, advisor history, results). The state persists to `localStorage` under the key `yf:v1:ui` with runtime validation.
 - **Backend**: Minimal Node HTTP server (no framework) exposing REST endpoints.
-  - `POST /api/llm` → accepts `{ form, feedback }`, calls OpenAI chat completions (default model `gpt-4o-mini`), and returns `{ variants, closing }` plus documented fallback copy when OpenAI is unavailable.
+  - `POST /api/llm` → accepts `{ form, feedback }`, calls xAI Grok chat completions (model `grok-4-latest`, temperature 0.7), and returns `{ variants, closing }` plus documented fallback copy when Grok is unavailable.
   - `POST /api/sales` → same contract as `/api/llm`, tuned for sales messaging and sharing identical fallback behaviour.
 - **Shared modules**: Calculation logic, presets, and sales rules live under `src/state`, `src/config`, `src/data`, and are shared by both client and server where practical.
 
@@ -91,17 +91,17 @@ This specification captures the behaviour and architecture of the current YetiFo
 - Uses LayoutContext form state, validates it with `formSchema` before any network call, and blocks the request until the form passes.
 - Submits `{ form, feedback }` (feedback wraps the user question) to `/api/llm`; the server responds with `{ variants, closing }` or a documented fallback copy.
 - UI renders the variants as bullet points with a closing paragraph and persists the last 10 entries in `advisor.history`.
-- When OpenAI or validation fails, the panel surfaces the static fallback variants (`Standard foam…`, `Premium option…`) and the closing "Let's discuss the best fit for your shed."
+- When Grok or validation fails, the panel surfaces the static fallback variants (`Standard foam…`, `Premium option…`) and the closing "Let's discuss the best fit for your shed."
 
 ### 7.2 Sales Composer (`src/components/sales/SalesPanel.tsx`)
 - Reuses the same validated form payload, allowing optional customer notes and internal feedback that travel via the `feedback` field.
-- Posts `{ form, feedback }` to `/api/sales` and renders the resulting variants/closing, mirroring the advisor fallback behaviour.
+- Posts `{ form, feedback }` to `/api/sales` and renders the resulting variants/closing, mirroring the advisor fallback behaviour when Grok is unavailable.
 - Legacy scenario detection, snippet selection, and feedback storage modules remain available for future expansions but are not part of the launch-critical flow.
 
 ### 7.3 Server Services (`server/services/llmPlanner.ts`, `server/services/salesComposer.ts`)
-- Both services construct OpenAI chat requests from the incoming form/feedback, request JSON-formatted completions, and fall back to static responses when OpenAI errors or returns empty content.
+- Both services construct xAI Grok chat requests from the incoming form/feedback, request JSON-formatted completions, and fall back to static responses when OpenAI errors or returns empty content.
 - Responses are normalised into simple string arrays and a single closing string before being returned to the client.
-- Defaults: `OPENAI_MODEL` falls back to `gpt-4o-mini`; variants default to the two-line static copy noted above, and closings fall back to "Let's discuss the best fit for your shed." on failure.
+- Defaults: requests target `grok-4-latest` at temperature 0.7; variants default to the two-line static copy noted above, and closings fall back to "Let's discuss the best fit for your shed." on failure.
 
 ### 7.4 Sales Data Files
 - `src/data/salesKB/*.json` and related stores remain as reference data for future rule engines but are currently unused in the launch path.
@@ -115,7 +115,7 @@ This specification captures the behaviour and architecture of the current YetiFo
 ## 9. API Contracts
 ### 9.1 POST /api/llm
 - Request: `{ form: ValidFormState, feedback?: Record<string, unknown> }`. The backend validates the form with the same Zod schema used on the client and rejects incomplete payloads with `400` errors.
-- Response: `{ variants: string[], closing: string }`. When OpenAI fails or returns empty content the server falls back to `['Standard foam application for this size.', 'Premium option with extra coverage.']` and the closing "Let's discuss the best fit for your shed."
+- Response: `{ variants: string[], closing: string }`. When Grok fails or returns empty content the server falls back to `['Standard foam application for this size.', 'Premium option with extra coverage.']` and the closing "Let's discuss the best fit for your shed."
 - Errors: `{ error: { type, message } }` with HTTP 4xx/5xx, including `rate_limit` and `auth` types from middleware.
 
 ### 9.2 POST /api/sales
@@ -136,7 +136,7 @@ This specification captures the behaviour and architecture of the current YetiFo
 - `npm run server` → Node server with tsx runtime.
 - `npm run dev:all` → concurrently run both (requires `.env`).
 - `npm run build` → production bundle.
-- `npm run test` → Vitest suites covering advisor and sales contracts, including OpenAI fallback handling and client validation.
+- `npm run test` → Vitest suites covering advisor and sales contracts, including Grok fallback handling and client validation.
 - Additional regression tests (calculation engine, UI flows) remain TODO.
 
 ## 12. Future Enhancements
@@ -146,7 +146,7 @@ This specification captures the behaviour and architecture of the current YetiFo
 - Introduce authentication and persistent storage if/when multi-user environment required.
 
 ## 13. Change Log
-- **2025-10-06** – Updated `/api/llm` and `/api/sales` contracts to `{ form, feedback } → { variants, closing }`, aligned client tooling, documented fallback behaviour, and added Vitest coverage for advisor/sales flows.
+- **2025-10-06** – Switched `/api/llm` and `/api/sales` to xAI Grok (`grok-4-latest`) with `{ form, feedback } → { variants, closing }`, aligned client tooling, documented fallback behaviour, and added Vitest coverage for advisor/sales flows.
 - **2025-02-15** – Removed site selector input and environmental data fetch. Updated calculation flow, advisor prompt, sales composer meta, Vite proxy, and documentation accordingly.
 - **2024-12-04** – Added advisor panel integration and initial sales composer stubs.
 - **2024-10-18** – Implemented calculation engine, openings modal, and persistent layout.

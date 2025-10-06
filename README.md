@@ -2,16 +2,16 @@
 ## Overview
 - Desktop estimator for YetiFoam sales staff to scope spray foam jobs on metal sheds.
 - Frontend: React 19 + TypeScript, Vite, Tailwind layer; layout via `react-resizable-panels` with localStorage persistence.
-- Backend: lightweight Node/TS server (`server/index.ts`) exposing `/api/llm` and `/api/sales` over HTTP; both endpoints accept `{ form, feedback }` payloads, return `{ variants, closing }`, and fall back to static copy when OpenAI is unavailable (default model `gpt-4o-mini`).
+- Backend: lightweight Node/TS server (`server/index.ts`) exposing `/api/llm` and `/api/sales` over HTTP; both endpoints accept `{ form, feedback }` payloads, return `{ variants, closing }`, and fall back to static copy when Grok is unavailable (powered by xAI Grok `grok-4-latest`).
 - Supporting config lives in `src/config` (theme, labels, layout presets) to keep UI tokens and copy configurable without code edits.
 
 ## Current Build Status
 - Phase 0 scaffold remains solid: Vite app boots, panel resizing persists (`src/state/LayoutContext.tsx`, `src/hooks/usePersistentState.ts`), and CollapsibleSection auto-collapses after 300 ms when `isComplete` is true.
-- AI Advisor panel validates the persisted form before submitting `{ form, feedback }` to `/api/llm`; the UI renders variant bullets plus a closing statement and surfaces the static fallback copy whenever OpenAI errors occur. Rate limiting still protects the endpoint and an OpenAI key remains required.
-- Sales composer tooling now mirrors the API contract: it validates the shared form state, posts `{ form, feedback }` to `/api/sales`, and renders the returned variants/closing with the documented fallback messaging.
+- AI Advisor panel validates the persisted form before submitting `{ form, feedback }` to `/api/llm`; the UI renders variant bullets plus a closing statement and surfaces the static fallback copy whenever xAI Grok requests fail. Rate limiting still protects the endpoint and an `XAI_API_KEY` remains required.
+- Sales composer tooling now mirrors the API contract: it validates the shared form state, posts `{ form, feedback }` to `/api/sales`, and renders the returned variants/closing with the documented fallback messaging even when Grok is unreachable.
 - Phase 1 inputs are complete: `src/components/inputs/*` implements validated dimensions, pitch/cladding/member selectors, spray options, openings modal, and a calculate button gated by `isFormValid`. Form state persists via LayoutContext under `localStorage` key `yf:v1:ui`.
 - Phase 3 results experience is live: `src/results/CalculationController.tsx` orchestrates the 800 ms calculate animation, `ResultsPanel` now renders `ConfigSummary`, `TotalsSummary`, and `BreakdownTable` with the floating `Toolbar`, and the right-rail Export panel surfaces manual copy text blocks while respecting persisted layout proportions.
-- Vitest suites (`npm run test`) cover advisor and sales contract parsing, fallback handling, and client validation.
+- Vitest suites (`npm run test`) cover advisor and sales contract parsing against the Grok integration, fallback handling, and client validation.
 
 ## Export (Text-only, No Storage)
 The Export panel renders a summary and an email draft as plain text. Users copy/paste manually. No PDF, clipboard API, or quote saving/localStorage is used.
@@ -28,7 +28,7 @@ The Export panel renders a summary and an email draft as plain text. Users copy/
 - Coding rules: follow Section 2 formulas verbatim, keep files ASCII unless existing Unicode demands otherwise, prefer configs in `src/config`, do not revert user-authored changes, and accompany non-obvious logic with succinct comments.
 
 ## Environment Notes
-- Required `.env` keys: `OPENAI_API_KEY` (must be set for `/api/llm`), optional `OPENAI_MODEL` (defaults to `gpt-4o-mini`); copy `.env.example` as a starting point.
+- Required `.env` keys: `XAI_API_KEY` (recommended for `/api/llm`/`/api/sales`, otherwise the demo key is used automatically); copy `.env.example` as a starting point.
 - Ports: Vite dev server on 5173, API server on 8788 (`PORT` override supported); ensure both are free before running `npm run dev:all`.
 - Scripts: `npm run dev` (frontend only), `npm run server` (API only), `npm run dev:all` (concurrently run both with shared `.env`), `npm run build` (production bundle), `npm run test` (Vitest coverage for advisor/sales flows).
 - Dependencies: Node 18+.

@@ -1,14 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { defaultFormValues, formSchema } from '../src/state/formSchema';
 
-const mockCreate = vi.fn();
-
-vi.mock('openai', () => ({
-  default: class {
-    chat = { completions: { create: mockCreate } };
-  },
-}));
-
 function buildValidForm() {
   const base = JSON.parse(JSON.stringify(defaultFormValues));
   base.dimensions = { length: 10, width: 5, height: 3 };
@@ -18,22 +10,27 @@ function buildValidForm() {
   return formSchema.parse(base);
 }
 
+let mockFetch: vi.Mock;
+
 beforeEach(() => {
+  mockFetch = vi.fn();
+  global.fetch = mockFetch as unknown as typeof fetch;
   vi.resetModules();
-  mockCreate.mockReset();
 });
 
 describe('server planLLM', () => {
   it('parses JSON content with code fences into variants and closing', async () => {
-    mockCreate.mockResolvedValue({
-      choices: [
-        {
-          message: {
-            content:
-              '```json\n{ "variants": ["Option A", "Option B"], "closing": "Wrap up" }\n```',
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        choices: [
+          {
+            message: {
+              content: '```json\n{ "variants": ["Option A", "Option B"], "closing": "Wrap up" }\n```',
+            },
           },
-        },
-      ],
+        ],
+      }),
     });
 
     const { planLLM } = await import('../server/services/llmPlanner.ts');
@@ -42,8 +39,13 @@ describe('server planLLM', () => {
     expect(result.closing).toBe('Wrap up');
   });
 
-  it('returns fallback copy when OpenAI throws', async () => {
-    mockCreate.mockRejectedValue(new Error('Upstream failure'));
+  it('returns fallback copy when Grok request fails', async () => {
+    mockFetch.mockResolvedValue({
+      ok: false,
+      status: 500,
+      text: async () => 'server exploded',
+    });
+
     const { planLLM } = await import('../server/services/llmPlanner.ts');
     const result = await planLLM({}, {});
     expect(result.variants).toEqual([
@@ -63,11 +65,10 @@ describe('client requestAdvisor', () => {
   });
 
   it('posts form/feedback and normalises fallback response', async () => {
-    const mockFetch = vi.fn().mockResolvedValue({
+    mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({ variants: [], closing: '' }),
     });
-    global.fetch = mockFetch as unknown as typeof fetch;
 
     const { requestAdvisor, DEFAULT_ADVISOR_VARIANTS, DEFAULT_ADVISOR_CLOSING } = await import(
       '../src/services/llmClient.ts'
@@ -77,7 +78,8 @@ describe('client requestAdvisor', () => {
     const response = await requestAdvisor({ form, question: 'Key selling points?' });
 
     expect(mockFetch).toHaveBeenCalledTimes(1);
-    const [, init] = mockFetch.mock.calls[0] as [string, RequestInit];
+    const [url, init] = mockFetch.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe('/api/llm');
     expect(init?.method).toBe('POST');
     const payload = JSON.parse(String(init?.body ?? '{}'));
     expect(payload.form.dimensions.length).toBe(10);

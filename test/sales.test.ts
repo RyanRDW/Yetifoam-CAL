@@ -1,14 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { defaultFormValues, formSchema } from '../src/state/formSchema';
 
-const mockCreate = vi.fn();
-
-vi.mock('openai', () => ({
-  default: class {
-    chat = { completions: { create: mockCreate } };
-  },
-}));
-
 function buildValidForm() {
   const base = JSON.parse(JSON.stringify(defaultFormValues));
   base.dimensions = { length: 12, width: 6, height: 4 };
@@ -19,21 +11,27 @@ function buildValidForm() {
   return formSchema.parse(base);
 }
 
+let mockFetch: vi.Mock;
+
 beforeEach(() => {
+  mockFetch = vi.fn();
+  global.fetch = mockFetch as unknown as typeof fetch;
   vi.resetModules();
-  mockCreate.mockReset();
 });
 
 describe('server composeSales', () => {
   it('normalises structured JSON into variants and closing', async () => {
-    mockCreate.mockResolvedValue({
-      choices: [
-        {
-          message: {
-            content: '{"variants": ["Roof focus", {"content": ["Walls focus"]}], "closing": "Seal the deal"}',
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        choices: [
+          {
+            message: {
+              content: '{"variants": ["Roof focus", {"content": ["Walls focus"]}], "closing": "Seal the deal"}',
+            },
           },
-        },
-      ],
+        ],
+      }),
     });
 
     const { composeSales } = await import('../server/services/salesComposer.ts');
@@ -42,8 +40,13 @@ describe('server composeSales', () => {
     expect(result.closing).toBe('Seal the deal');
   });
 
-  it('returns fallback when OpenAI rejects', async () => {
-    mockCreate.mockRejectedValue(new Error('network down'));
+  it('returns fallback when Grok rejects', async () => {
+    mockFetch.mockResolvedValue({
+      ok: false,
+      status: 500,
+      text: async () => 'network down',
+    });
+
     const { composeSales } = await import('../server/services/salesComposer.ts');
     const result = await composeSales({}, {});
     expect(result.variants).toEqual([
@@ -63,11 +66,10 @@ describe('client composeSales', () => {
   });
 
   it('posts form data and applies fallback when response lacks variants', async () => {
-    const mockFetch = vi.fn().mockResolvedValue({
+    mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({ variants: [], closing: '' }),
     });
-    global.fetch = mockFetch as unknown as typeof fetch;
 
     const {
       composeSales: composeSalesClient,
@@ -79,7 +81,8 @@ describe('client composeSales', () => {
     const response = await composeSalesClient({ form, feedback: { channel: 'phone' } });
 
     expect(mockFetch).toHaveBeenCalledTimes(1);
-    const [, init] = mockFetch.mock.calls[0] as [string, RequestInit];
+    const [url, init] = mockFetch.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe('/api/sales');
     expect(init?.method).toBe('POST');
     const payload = JSON.parse(String(init?.body ?? '{}'));
     expect(payload.form.dimensions.length).toBe(12);

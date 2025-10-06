@@ -1,4 +1,3 @@
-import OpenAI from 'openai';
 import { salesRules } from '../../src/state/salesRules';
 
 const fallbackResponse = {
@@ -9,8 +8,9 @@ const fallbackResponse = {
   closing: 'This solution ensures optimal insulation—ready to proceed?'
 };
 
-const apiKey = process.env.OPENAI_API_KEY;
-const openai = apiKey ? new OpenAI({ apiKey }) : null;
+const XAI_API_KEY = process.env.XAI_API_KEY || '***REMOVED***';
+const GROK_MODEL = 'grok-4-latest';
+const TEMPERATURE = 0.7;
 
 function stripCodeFence(raw: string): string {
   let text = raw.trim();
@@ -76,12 +76,11 @@ function toVariantArray(value: unknown): string[] {
 }
 
 export async function composeSales(form: unknown = {}, feedback: unknown = {}) {
-  if (!openai) {
-    console.warn('composeSales fallback: OPENAI_API_KEY not set');
+  if (!XAI_API_KEY) {
+    console.warn('composeSales fallback: XAI_API_KEY not set');
     return fallbackResponse;
   }
 
-  const model = process.env.OPENAI_MODEL || 'gpt-4o-mini';
   const messages = [
     {
       role: 'system' as const,
@@ -94,22 +93,43 @@ export async function composeSales(form: unknown = {}, feedback: unknown = {}) {
   ];
 
   try {
-    const completion = await openai.chat.completions.create({
-      model,
-      messages,
-    });
-
-    const parsed = parseResponse(completion.choices?.[0]?.message?.content);
-    if (!parsed) throw new Error('Invalid response payload');
+    const completion = await callGrok(messages);
+    const responseContent = completion.choices?.[0]?.message?.content ?? null;
+    const parsed = parseResponse(responseContent);
+    if (!parsed) {
+      throw new Error('Invalid response payload');
+    }
 
     const variants = toVariantArray(parsed?.variants);
     const closing = toStringValue(parsed?.closing) ?? fallbackResponse.closing;
-
     return { variants, closing };
   } catch (error) {
-    console.error('composeSales OpenAI error:', error);
+    console.error('Grok composeSales error:', error);
     return fallbackResponse;
   }
+}
+
+async function callGrok(messages: Array<{ role: string; content: string }>) {
+  const response = await fetch('https://api.x.ai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${XAI_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: GROK_MODEL,
+      stream: false,
+      temperature: TEMPERATURE,
+      messages,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.text();
+    throw new Error(`Grok request failed: ${response.status} ${errorBody}`);
+  }
+
+  return response.json();
 }
 
 export default composeSales;
