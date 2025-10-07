@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "env": {
+    "GROK_API_KEY": "@grok_api_key",
+    "OPENAI_API_KEY": "@openai_api_key",
+    "OPENAI_MODEL": "gpt-4o-mini"
+  },
+  "builds": [
+    { "src": "package.json", "use": "@vercel/static-build", "config": { "distDir": "dist" } },
+    { "src": "server/index.ts", "use": "@vercel/node" }
+  ],
+  "routes": [
+    { "src": "/api/.*", "dest": "/server/index.ts" },
+    { "src": "(.*)", "dest": "/dist$1" }
+  ]
+}

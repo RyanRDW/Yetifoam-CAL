@@ -11,6 +11,7 @@ export type SectionKey =
   | 'Openings';
 export type SectionState = Record<SectionKey, 'expanded' | 'collapsed'>;
 export type PanelSizes = { rightStack: number[]; inputWidthPct: number };
+export type AdvisorProvider = 'grok' | 'openai';
 export type AdvisorEntry = {
   id: string;
   question: string;
@@ -20,6 +21,7 @@ export type AdvisorEntry = {
 };
 export type AdvisorState = {
   history: AdvisorEntry[];
+  provider: AdvisorProvider;
 };
 export type CalculationMode = 'input' | 'calculating' | 'results';
 export type ResultStatus = 'idle' | 'pending' | 'ready' | 'error';
@@ -97,7 +99,7 @@ const baseLayout: AppState = {
     Openings: 'collapsed',
   },
   panelSizes: { rightStack: [65, 35], inputWidthPct: 40 },
-  advisor: { history: [] },
+  advisor: { history: [], provider: 'grok' },
   mode: 'input',
   results: {
     status: 'idle',
@@ -110,7 +112,7 @@ const baseLayout: AppState = {
 const defaultLayoutState: AppState = {
   sections: { ...baseLayout.sections },
   panelSizes: { inputWidthPct: baseLayout.panelSizes.inputWidthPct, rightStack: [...baseLayout.panelSizes.rightStack] },
-  advisor: { history: [...baseLayout.advisor.history] },
+  advisor: { history: [...baseLayout.advisor.history], provider: baseLayout.advisor.provider },
   mode: baseLayout.mode,
   results: {
     status: baseLayout.results.status,
@@ -167,12 +169,16 @@ function ensurePanelSizes(value: unknown): PanelSizes {
 
 function ensureAdvisorState(value: unknown): AdvisorState {
   if (!value || typeof value !== 'object') {
-    return { history: [] };
+    return { history: [], provider: 'grok' };
   }
 
-  const history = (value as Record<string, unknown>).history;
+  const record = value as Record<string, unknown>;
+  const history = record.history;
+  const providerRaw = record.provider;
+  const provider = providerRaw === 'openai' ? 'openai' : 'grok';
+
   if (!Array.isArray(history)) {
-    return { history: [] };
+    return { history: [], provider };
   }
 
   const entries: AdvisorEntry[] = [];
@@ -201,7 +207,7 @@ function ensureAdvisorState(value: unknown): AdvisorState {
     });
   });
 
-  return { history: entries };
+  return { history: entries, provider };
 }
 
 function ensureResultsState(value: unknown): ResultsState {

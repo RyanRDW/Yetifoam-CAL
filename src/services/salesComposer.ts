@@ -15,6 +15,7 @@ export const DEFAULT_SALES_CLOSING = 'This solution ensures optimal insulationâ€
 type SalesPayload = {
   form: FormState | ValidFormState;
   feedback?: Record<string, unknown>;
+  provider?: 'grok' | 'openai';
 };
 
 export async function composeSales(payload: SalesPayload): Promise<SalesResponse> {
@@ -22,6 +23,7 @@ export async function composeSales(payload: SalesPayload): Promise<SalesResponse
   const body = {
     form: validated,
     feedback: payload.feedback ?? {},
+    provider: payload.provider ?? 'grok',
   };
 
   const response = await fetch('/api/sales', {

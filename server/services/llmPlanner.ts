@@ -1,5 +1,13 @@
 import { salesRules } from '../../src/state/salesRules';
 
+type Provider = 'grok' | 'openai';
+
+type GrokResponse = {
+  choices?: Array<{ message?: { content?: string } }>;
+};
+
+type OpenAIResponse = GrokResponse;
+
 const fallbackResponse = {
   variants: [
     'Standard foam application for this size.',
@@ -8,9 +16,72 @@ const fallbackResponse = {
   closing: "Let's discuss the best fit for your shed."
 };
 
-const XAI_API_KEY = process.env.XAI_API_KEY || '***REMOVED***';
+const DEFAULT_GROK_KEY = '***REMOVED***';
+const GROK_API_KEY = process.env.GROK_API_KEY || process.env.XAI_API_KEY || DEFAULT_GROK_KEY;
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
 const GROK_MODEL = 'grok-4-latest';
 const TEMPERATURE = 0.7;
+
+export async function planLLM(
+  form: unknown = {},
+  feedback: unknown = {},
+  preferredProvider: Provider = 'grok'
+) {
+  const messages = [
+    {
+      role: 'system' as const,
+      content: `You are a sales advisor for YetiFoam shed insulation. Use these rules: ${JSON.stringify(salesRules)}. Generate 2-3 variants and a closing tailored to the provided configuration and feedback.`
+    },
+    {
+      role: 'user' as const,
+      content: `Configuration: ${JSON.stringify(form || {})}\nFeedback: ${JSON.stringify(feedback || {})}\nReturn JSON only (no markdown fences) shaped as { "variants": ["Variant 1"], "closing": "Close" }.\nEach variants entry must be a plain string without embedded JSON or objects.\nThe closing must be a single plain string.`
+    }
+  ];
+
+  const providers: Provider[] = preferredProvider === 'openai' ? ['openai', 'grok'] : ['grok', 'openai'];
+  const hasAnyProvider = Boolean(GROK_API_KEY) || Boolean(OPENAI_API_KEY);
+
+  if (!hasAnyProvider) {
+    console.warn('planLLM: no LLM provider configured; returning fallback response.');
+    return fallbackResponse;
+  }
+
+  for (const provider of providers) {
+    try {
+      if (provider === 'grok') {
+        if (!GROK_API_KEY) continue;
+        const completion = await callGrok(messages);
+        const responseContent = completion.choices?.[0]?.message?.content ?? '';
+        const parsed = parseResponse(responseContent);
+        if (!parsed) throw new Error('Invalid Grok response payload');
+        return buildResult(parsed);
+      }
+
+      if (provider === 'openai') {
+        if (!OPENAI_API_KEY) continue;
+        const completion = await callOpenAI(messages);
+        const responseContent = completion.choices?.[0]?.message?.content ?? '';
+        const parsed = parseResponse(responseContent);
+        if (!parsed) throw new Error('Invalid OpenAI response payload');
+        return buildResult(parsed);
+      }
+    } catch (error) {
+      console.error(`planLLM ${provider} error:`, error);
+    }
+  }
+
+  return fallbackResponse;
+}
+
+function buildResult(parsed: any) {
+  const variants = toVariantArray(parsed?.variants);
+  const closing = toStringValue(parsed?.closing) ?? fallbackResponse.closing;
+  return {
+    variants: variants.length > 0 ? variants : fallbackResponse.variants,
+    closing,
+  };
+}
 
 function stripCodeFence(raw: string): string {
   let text = raw.trim();
@@ -75,46 +146,12 @@ function toVariantArray(value: unknown): string[] {
   return variants.length > 0 ? variants : fallbackResponse.variants;
 }
 
-export async function planLLM(form: unknown = {}, feedback: unknown = {}) {
-  if (!XAI_API_KEY) {
-    console.warn('planLLM fallback: XAI_API_KEY not set');
-    return fallbackResponse;
-  }
-
-  const messages = [
-    {
-      role: 'system' as const,
-      content: `You are a sales advisor for YetiFoam shed insulation. Use these rules: ${JSON.stringify(salesRules)}. Generate 2-3 variants and a closing tailored to the provided configuration and feedback.`
-    },
-    {
-      role: 'user' as const,
-      content: `Configuration: ${JSON.stringify(form || {})}\nFeedback: ${JSON.stringify(feedback || {})}\nReturn JSON only (no markdown fences) shaped as { "variants": ["Variant 1"], "closing": "Close" }.\nEach variants entry must be a plain string without embedded JSON or objects.\nThe closing must be a single plain string.`
-    }
-  ];
-
-  try {
-    const completion = await callGrok(messages);
-    const responseContent = completion.choices?.[0]?.message?.content ?? null;
-    const parsed = parseResponse(responseContent);
-    if (!parsed) {
-      throw new Error('Invalid response payload');
-    }
-
-    const variants = toVariantArray(parsed?.variants);
-    const closing = toStringValue(parsed?.closing) ?? fallbackResponse.closing;
-    return { variants, closing };
-  } catch (error) {
-    console.error('Grok planLLM error:', error);
-    return fallbackResponse;
-  }
-}
-
-async function callGrok(messages: Array<{ role: string; content: string }>) {
+async function callGrok(messages: Array<{ role: string; content: string }>): Promise<GrokResponse> {
   const response = await fetch('https://api.x.ai/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${XAI_API_KEY}`,
+      Authorization: `Bearer ${GROK_API_KEY}`,
     },
     body: JSON.stringify({
       model: GROK_MODEL,
@@ -127,6 +164,29 @@ async function callGrok(messages: Array<{ role: string; content: string }>) {
   if (!response.ok) {
     const errorBody = await response.text();
     throw new Error(`Grok request failed: ${response.status} ${errorBody}`);
+  }
+
+  return response.json();
+}
+
+async function callOpenAI(messages: Array<{ role: string; content: string }>): Promise<OpenAIResponse> {
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${OPENAI_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: OPENAI_MODEL,
+      temperature: TEMPERATURE,
+      stream: false,
+      messages,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.text();
+    throw new Error(`OpenAI request failed: ${response.status} ${errorBody}`);
   }
 
   return response.json();

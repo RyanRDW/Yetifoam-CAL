@@ -49,55 +49,77 @@ export function InputPanel() {
   };
 
   return (
-    <div className="flex h-full flex-col gap-4 overflow-y-auto px-4 py-6">
-      <CollapsibleSection id="dim" title="Dimensions" isComplete={dimensionsComplete}>
-        <Dimensions />
-      </CollapsibleSection>
+    <div className="flex h-full flex-col gap-6 overflow-y-auto px-5 py-10 lg:px-8">
+      <div className="app-surface-glass rounded-3xl px-6 py-6">
+        <p className="text-xs uppercase tracking-[0.3em] text-blue-600/80">Configuration</p>
+        <h1 className="mt-2 text-2xl font-semibold text-slate-900">Build the shed brief</h1>
+        <p className="mt-3 max-w-xl text-sm text-slate-600">
+          Complete each section to calculate spray coverage. Progressively reveal the details to keep the conversation with your
+          customer focused and confident.
+        </p>
+      </div>
 
-      <CollapsibleSection id="pitch" title="Pitch" isComplete={pitchComplete}>
-        <PitchSelector />
-      </CollapsibleSection>
+      <div className="space-y-4 pb-4">
+        <CollapsibleSection id="dim" title="Dimensions" isComplete={dimensionsComplete}>
+          <Dimensions />
+        </CollapsibleSection>
 
-      <CollapsibleSection id="clad" title="Cladding" isComplete={claddingComplete}>
-        <CladdingSelector />
-      </CollapsibleSection>
+        <CollapsibleSection id="pitch" title="Pitch" isComplete={pitchComplete}>
+          <PitchSelector />
+        </CollapsibleSection>
 
-      <CollapsibleSection id="mem" title="Members" isComplete={membersComplete}>
-        <MemberSelectors />
-      </CollapsibleSection>
+        <CollapsibleSection id="clad" title="Cladding" isComplete={claddingComplete}>
+          <CladdingSelector />
+        </CollapsibleSection>
 
-      <CollapsibleSection id="opt" title="SprayOptions" isComplete={sprayComplete}>
-        <SprayOptions onInteract={() => setSprayAcknowledged(true)} />
-        {!sprayComplete && (
-          <button
-            type="button"
-            className="mt-3 text-xs text-blue-600 hover:underline"
-            onClick={() => setSprayAcknowledged(true)}
-          >
-            Mark complete
-          </button>
-        )}
-      </CollapsibleSection>
+        <CollapsibleSection id="mem" title="Members" isComplete={membersComplete}>
+          <MemberSelectors />
+        </CollapsibleSection>
 
-      <CollapsibleSection id="open" title="Openings" isComplete={openingsComplete}>
-        <div className="flex flex-col gap-3">
-          <p className="text-sm text-slate-600">
-            Track deductions for doors, windows, laserlight and custom areas. Quantities persist between sessions.
-          </p>
-          <div className="flex items-center justify-between rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
-            <span>Total openings selected: {openingsTotal}</span>
-            <button
-              type="button"
-              className="rounded-md border border-blue-600 px-3 py-1 text-sm font-semibold text-blue-600 hover:bg-blue-50"
-              onClick={() => setOpeningsModalOpen(true)}
-            >
-              Manage Openings…
-            </button>
+        <CollapsibleSection id="opt" title="SprayOptions" isComplete={sprayComplete}>
+          <div className="space-y-4">
+            <SprayOptions onInteract={() => setSprayAcknowledged(true)} />
+            {!sprayComplete && (
+              <button
+                type="button"
+                className="text-xs font-medium text-blue-600 hover:text-blue-700"
+                onClick={() => setSprayAcknowledged(true)}
+              >
+                Mark as complete
+              </button>
+            )}
           </div>
-        </div>
-      </CollapsibleSection>
+        </CollapsibleSection>
 
-      <CalculateButton />
+        <CollapsibleSection id="open" title="Openings" isComplete={openingsComplete}>
+          <div className="flex flex-col gap-3">
+            <p className="text-sm text-slate-600">
+              Track deductions for doors, windows, laserlite and custom areas. Counts persist automatically and inform the
+              calculation breakdown.
+            </p>
+            <div className="flex items-center justify-between rounded-xl border border-blue-100 bg-blue-50/70 px-4 py-3 text-sm text-blue-900">
+              <span className="font-medium">Total openings selected: {openingsTotal}</span>
+              <button
+                type="button"
+                className="rounded-lg bg-white px-3 py-1.5 text-sm font-semibold text-blue-600 shadow-sm transition hover:bg-blue-100"
+                onClick={() => setOpeningsModalOpen(true)}
+              >
+                Manage openings
+              </button>
+            </div>
+          </div>
+        </CollapsibleSection>
+      </div>
+
+      <div className="app-surface-glass mt-auto rounded-3xl px-6 py-6">
+        <CalculateButton />
+        {!formValid && (
+          <p className="mt-3 text-xs text-slate-500">
+            Complete all required inputs to enable calculation. Your entries persist automatically under the
+            <code className="ml-1 rounded bg-slate-100 px-1 py-0.5 text-[10px]">yf:v1:ui</code> key.
+          </p>
+        )}
+      </div>
 
       <OpeningsModal
         open={openingsModalOpen}
@@ -105,13 +127,6 @@ export function InputPanel() {
         onApply={handleApplyOpenings}
         onClose={() => setOpeningsModalOpen(false)}
       />
-
-      {!formValid && (
-        <p className="text-xs text-slate-500">
-          Complete all required inputs above to enable calculation. Your entries persist under local storage key
-          <code className="ml-1 rounded bg-slate-100 px-1">yf:v1:ui</code>.
-        </p>
-      )}
     </div>
   );
 }

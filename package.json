@@ -8,9 +8,14 @@
     "server": "dotenv -e .env tsx server/index.ts",
     "dev:all": "concurrently \"npm:server\" \"npm:dev\"",
     "build": "dotenv -e .env vite build",
-    "test": "dotenv -e .env vitest"
+    "test": "dotenv -e .env vitest",
+    "build:client": "vite build",
+    "build:server": "tsc --project tsconfig.node.json",
+    "deploy": "vercel deploy",
+    "deploy:prod": "vercel deploy --prod"
   },
   "dependencies": {
+    "jspdf": "^3.0.3",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-resizable-panels": "^3.0.6",

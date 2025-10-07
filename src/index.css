@@ -9,15 +9,42 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #0f172a;
-  background-color: #f1f5f9;
+  background: #0f172a;
 }
 
 body {
   margin: 0;
   min-height: 100vh;
-  background-color: inherit;
+  background-color: #f1f5f9;
+  color: #0f172a;
+  background-image: radial-gradient(circle at top, rgba(59, 130, 246, 0.12), transparent 45%),
+    radial-gradient(circle at bottom left, rgba(14, 116, 144, 0.12), transparent 55%),
+    radial-gradient(circle at bottom right, rgba(148, 163, 184, 0.2), transparent 60%);
 }
 
 #root {
   min-height: 100vh;
+}
+
+.app-surface-glass {
+  backdrop-filter: blur(20px);
+  background-color: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 20px 45px -24px rgba(15, 23, 42, 0.35);
+  border: 1px solid rgba(226, 232, 240, 0.7);
+}
+
+.text-gradient-primary {
+  background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 45%, #14b8a6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.link-ghost {
+  color: rgba(100, 116, 139, 0.9);
+  transition: color 0.2s ease;
+}
+
+.link-ghost:hover {
+  color: #2563eb;
 }

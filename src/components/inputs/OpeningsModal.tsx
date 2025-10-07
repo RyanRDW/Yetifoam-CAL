@@ -49,41 +49,46 @@ export function OpeningsModal({ open, counts, onApply, onClose }: OpeningsModalP
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 px-4 py-8"
       role="dialog"
       aria-modal="true"
       onMouseDown={onClose}
     >
       <div
-        className="w-full max-w-3xl rounded-lg bg-white shadow-xl"
+        className="app-surface-glass max-h-[520px] w-full max-w-3xl overflow-hidden rounded-3xl"
         onMouseDown={(event) => event.stopPropagation()}
       >
-        <header className="flex items-center justify-between border-b px-6 py-4">
+        <header className="flex items-center justify-between border-b border-slate-200/60 px-6 py-4">
           <div>
-            <h2 className="text-lg font-semibold text-slate-800">Manage Openings</h2>
-            <p className="text-sm text-slate-500">Track deductions across gable, side walls, and roof.</p>
+            <h2 className="text-lg font-semibold text-slate-900">Manage openings</h2>
+            <p className="text-sm text-slate-500">Log deductions across gable, side walls, and roof surfaces.</p>
           </div>
-          <button type="button" className="text-sm text-slate-500" onClick={onClose}>
-            ✕
+          <button
+            type="button"
+            className="rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-500 transition hover:bg-slate-200 hover:text-slate-700"
+            onClick={onClose}
+          >
+            Close
           </button>
         </header>
-        <div className="max-h-[420px] overflow-auto px-6 py-4">
+        <div className="max-h-[360px] overflow-auto px-6 py-2">
           <ul className="space-y-3">
             {openingTypes.map((type) => {
               const meta = OPENING_LABELS[type];
               const quantity = draft[type] ?? 0;
               return (
-                <li key={type} className="flex items-center justify-between rounded-md border border-slate-200 bg-slate-50 px-4 py-3">
+                <li
+                  key={type}
+                  className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 text-sm text-slate-700 shadow-sm"
+                >
                   <div>
-                    <p className="text-sm font-semibold text-slate-700">{meta.label}</p>
-                    <p className="text-xs text-slate-500">
-                      {meta.area} · Deduct from {meta.surface}
-                    </p>
+                    <p className="font-semibold text-slate-800">{meta.label}</p>
+                    <p className="text-xs text-slate-500">{meta.area} · Deduct from {meta.surface}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
-                      className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 text-lg leading-none text-slate-600 disabled:opacity-40"
+                      className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 text-lg leading-none text-slate-600 transition hover:border-blue-500 hover:text-blue-600 disabled:opacity-40"
                       onClick={() =>
                         setDraft((prev) => ({ ...prev, [type]: Math.max(0, (prev[type] ?? 0) - 1) }))
                       }
@@ -94,7 +99,7 @@ export function OpeningsModal({ open, counts, onApply, onClose }: OpeningsModalP
                     <span className="w-10 text-center text-sm font-semibold text-slate-700">{quantity}</span>
                     <button
                       type="button"
-                      className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 text-lg leading-none text-slate-600"
+                      className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 text-lg leading-none text-slate-600 transition hover:border-blue-500 hover:text-blue-600"
                       onClick={() =>
                         setDraft((prev) => ({ ...prev, [type]: Math.min(999, (prev[type] ?? 0) + 1) }))
                       }
@@ -107,23 +112,23 @@ export function OpeningsModal({ open, counts, onApply, onClose }: OpeningsModalP
             })}
           </ul>
         </div>
-        <footer className="flex items-center justify-between border-t px-6 py-4">
-          <span className="text-sm text-slate-600">Total openings: {totalSelected}</span>
+        <footer className="flex items-center justify-between border-t border-slate-200/60 bg-slate-50/70 px-6 py-4">
+          <span className="text-sm font-medium text-slate-600">Total openings: {totalSelected}</span>
           <div className="flex items-center gap-3">
             <button
               type="button"
-              className="rounded-md border border-slate-300 px-4 py-2 text-sm text-slate-600 hover:bg-slate-100"
+              className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-100"
               onClick={onClose}
             >
               Cancel
             </button>
             <button
               type="button"
-              className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:bg-slate-400"
+              className="rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:from-blue-500 hover:to-cyan-500 disabled:cursor-not-allowed disabled:opacity-60"
               onClick={() => onApply({ ...draft })}
               disabled={draft === counts}
             >
-              Apply Changes
+              Apply changes
             </button>
           </div>
         </footer>

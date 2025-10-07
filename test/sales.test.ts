@@ -17,6 +17,8 @@ beforeEach(() => {
   mockFetch = vi.fn();
   global.fetch = mockFetch as unknown as typeof fetch;
   vi.resetModules();
+  process.env.GROK_API_KEY = 'test-grok';
+  process.env.OPENAI_API_KEY = 'test-openai';
 });
 
 describe('server composeSales', () => {
@@ -41,14 +43,21 @@ describe('server composeSales', () => {
   });
 
   it('returns fallback when Grok rejects', async () => {
-    mockFetch.mockResolvedValue({
-      ok: false,
-      status: 500,
-      text: async () => 'network down',
-    });
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        text: async () => 'network down',
+      })
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        text: async () => 'openai offline',
+      });
 
     const { composeSales } = await import('../server/services/salesComposer.ts');
     const result = await composeSales({}, {});
+    expect(mockFetch).toHaveBeenCalledTimes(2);
     expect(result.variants).toEqual([
       'Basic package: Covers core areas efficiently.',
       'Enhanced package: Includes member bands for durability.',
@@ -87,6 +96,7 @@ describe('client composeSales', () => {
     const payload = JSON.parse(String(init?.body ?? '{}'));
     expect(payload.form.dimensions.length).toBe(12);
     expect(payload.feedback.channel).toBe('phone');
+    expect(payload.provider).toBe('grok');
 
     expect(response.variants).toEqual(DEFAULT_SALES_VARIANTS);
     expect(response.closing).toBe(DEFAULT_SALES_CLOSING);

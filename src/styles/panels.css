@@ -1,29 +1,32 @@
 .yf-handle-x,
 .yf-handle-y {
-  background: transparent;
   position: relative;
+  background: transparent;
 }
 
 .yf-handle-x::after,
 .yf-handle-y::after {
   content: "";
   display: block;
-  background: #e5e7eb;
-  transition: background 0.2s ease, transform 0.2s ease;
+  background: linear-gradient(180deg, rgba(59, 130, 246, 0.6), rgba(14, 116, 144, 0.6));
+  border-radius: 9999px;
+  transition: transform 0.2s ease, background 0.2s ease;
 }
 
 .yf-handle-x::after {
-  width: 4px;
+  width: 6px;
   height: 100%;
+  margin: 0 auto;
 }
 
 .yf-handle-y::after {
-  height: 4px;
+  height: 6px;
   width: 100%;
+  margin: auto 0;
 }
 
 .yf-handle-x:hover::after,
 .yf-handle-y:hover::after {
-  background: #0066cc;
-  transform: scale(1.6);
+  transform: scale(1.4);
+  background: linear-gradient(180deg, rgba(59, 130, 246, 0.85), rgba(14, 116, 144, 0.85));
 }

@@ -1,5 +1,6 @@
-import { type ReactNode, useEffect } from 'react';
+import { type ReactNode, useEffect, useRef } from 'react';
 import { useLayout } from '../state/LayoutContext';
+import { ChevronDownIcon } from './icons/ChevronDownIcon';
 
 interface Props {
   id: string;
@@ -11,30 +12,42 @@ interface Props {
 export function CollapsibleSection({ id, title, isComplete, children }: Props) {
   const { state, dispatch } = useLayout();
   const expanded = state.sections[title] === 'expanded';
+  const wasComplete = useRef(isComplete);
 
   useEffect(() => {
-    if (isComplete && expanded) {
-      const timeout = window.setTimeout(() => {
-        dispatch({ type: 'SET_SECTIONS', payload: { ...state.sections, [title]: 'collapsed' } });
-      }, 300);
-      return () => window.clearTimeout(timeout);
-    }
+    const shouldAutoCollapse = !wasComplete.current && isComplete && expanded;
+    wasComplete.current = isComplete;
 
-    return undefined;
+    if (!shouldAutoCollapse) return;
+
+    const timeout = window.setTimeout(() => {
+      dispatch({ type: 'SET_SECTIONS', payload: { ...state.sections, [title]: 'collapsed' } });
+    }, 350);
+
+    return () => window.clearTimeout(timeout);
   }, [isComplete, expanded, dispatch, state.sections, title]);
 
+  const displayTitle = title.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim();
+
   return (
-    <section data-state={expanded ? 'open' : 'closed'} aria-expanded={expanded} id={id}>
-      <header
-        style={{ cursor: 'pointer', padding: '8px', borderBottom: '1px solid var(--border, #e5e7eb)' }}
+    <section
+      id={id}
+      data-state={expanded ? 'open' : 'closed'}
+      aria-expanded={expanded}
+      className="rounded-2xl border border-slate-200/70 bg-white/90 shadow-sm transition hover:border-slate-300"
+    >
+      <button
+        type="button"
+        className="flex w-full items-center justify-between gap-3 rounded-2xl px-5 py-3 text-left text-sm font-semibold text-slate-700 hover:bg-slate-50"
         onClick={() => {
           const next = expanded ? 'collapsed' : 'expanded';
           dispatch({ type: 'SET_SECTIONS', payload: { ...state.sections, [title]: next } });
         }}
       >
-        {title}
-      </header>
-      {expanded && <div style={{ padding: '8px' }}>{children}</div>}
+        <span>{displayTitle}</span>
+        <ChevronDownIcon className={`h-4 w-4 text-slate-400 transition-transform ${expanded ? 'rotate-180' : ''}`} />
+      </button>
+      {expanded && <div className="border-t border-slate-200/60 px-5 pb-5 pt-4 text-sm text-slate-700">{children}</div>}
     </section>
   );
 }

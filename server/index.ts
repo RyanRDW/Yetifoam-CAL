@@ -3,8 +3,11 @@ import llmHandler from "./api/llm.ts";
 import salesHandler from "./api/sales.ts";
 
 const PORT = process.env.PORT || 8787;
-if (!process.env.XAI_API_KEY) {
-  console.warn('[server] XAI_API_KEY not set, falling back to demo key. Configure XAI_API_KEY for production use.');
+if (!process.env.GROK_API_KEY && !process.env.XAI_API_KEY) {
+  console.warn('[server] GROK_API_KEY not set, using bundled demo key. Configure GROK_API_KEY for production use.');
+}
+if (!process.env.OPENAI_API_KEY) {
+  console.warn('[server] OPENAI_API_KEY not detected; OpenAI fallback will be skipped.');
 }
 
 const server = createServer(async (req, res) => {

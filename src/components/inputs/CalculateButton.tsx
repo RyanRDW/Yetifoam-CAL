@@ -15,10 +15,10 @@ export function CalculateButton() {
     <button
       type="button"
       className={[
-        'mt-4 flex h-16 w-full items-center justify-center gap-3 rounded-lg border text-lg font-semibold transition',
+        'flex w-full items-center justify-center gap-3 rounded-2xl px-6 py-4 text-base font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/60',
         disabled
-          ? 'cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400'
-          : 'border-blue-600 bg-blue-600 text-white hover:bg-blue-700',
+          ? 'cursor-not-allowed bg-slate-100 text-slate-400'
+          : 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/20 hover:from-blue-500 hover:to-cyan-500',
       ]
         .filter(Boolean)
         .join(' ')}
@@ -29,7 +29,7 @@ export function CalculateButton() {
       }}
       title={disabled ? 'Complete all inputs to calculate' : 'Calculate spray coverage'}
     >
-      {disabled ? 'Calculate' : pressedOnce ? 'Re-Calculate' : 'Calculate' }
+      {disabled ? 'Calculate coverage' : pressedOnce ? 'Recalculate coverage' : 'Calculate coverage'}
     </button>
   );
 }

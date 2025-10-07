@@ -16,6 +16,8 @@ beforeEach(() => {
   mockFetch = vi.fn();
   global.fetch = mockFetch as unknown as typeof fetch;
   vi.resetModules();
+  process.env.GROK_API_KEY = 'test-grok';
+  process.env.OPENAI_API_KEY = 'test-openai';
 });
 
 describe('server planLLM', () => {
@@ -40,14 +42,21 @@ describe('server planLLM', () => {
   });
 
   it('returns fallback copy when Grok request fails', async () => {
-    mockFetch.mockResolvedValue({
-      ok: false,
-      status: 500,
-      text: async () => 'server exploded',
-    });
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        text: async () => 'server exploded',
+      })
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        text: async () => 'openai exploded',
+      });
 
     const { planLLM } = await import('../server/services/llmPlanner.ts');
     const result = await planLLM({}, {});
+    expect(mockFetch).toHaveBeenCalledTimes(2);
     expect(result.variants).toEqual([
       'Standard foam application for this size.',
       'Premium option with extra coverage.',
@@ -84,6 +93,7 @@ describe('client requestAdvisor', () => {
     const payload = JSON.parse(String(init?.body ?? '{}'));
     expect(payload.form.dimensions.length).toBe(10);
     expect(payload.feedback.question).toBe('Key selling points?');
+    expect(payload.provider).toBe('grok');
 
     expect(response.variants).toEqual(DEFAULT_ADVISOR_VARIANTS);
     expect(response.closing).toBe(DEFAULT_ADVISOR_CLOSING);

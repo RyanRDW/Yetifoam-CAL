@@ -25,8 +25,8 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     const userId = (req.headers["x-user-id"] as string) || "local";
     rateLimit(userId);
 
-    const body = (await parseJson(req)) as { form?: any; feedback?: any };
-    const payload = await planLLM(body.form, body.feedback);
+    const body = (await parseJson(req)) as { form?: any; feedback?: any; provider?: 'grok' | 'openai' };
+    const payload = await planLLM(body.form, body.feedback, body.provider);
 
     res.statusCode = 200;
     res.setHeader("Content-Type", "application/json");

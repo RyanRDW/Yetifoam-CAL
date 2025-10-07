@@ -21,8 +21,8 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
   }
 
   try {
-    const body = (await readJson(req)) as { form?: any; feedback?: any };
-    const output = await composeSales(body.form, body.feedback);
+    const body = (await readJson(req)) as { form?: any; feedback?: any; provider?: 'grok' | 'openai' };
+    const output = await composeSales(body.form, body.feedback, body.provider);
 
     res.statusCode = 200;
     res.setHeader("Content-Type", "application/json");

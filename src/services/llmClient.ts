@@ -16,9 +16,10 @@ type AdvisorPayload = {
   form: FormState | ValidFormState;
   question: string;
   feedback?: Record<string, unknown>;
+  provider?: 'grok' | 'openai';
 };
 
-export async function requestAdvisor({ form, question, feedback }: AdvisorPayload): Promise<AdvisorResponse> {
+export async function requestAdvisor({ form, question, feedback, provider = 'grok' }: AdvisorPayload): Promise<AdvisorResponse> {
   const validated = ensureValidForm(form);
   const body = {
     form: validated,
@@ -26,6 +27,7 @@ export async function requestAdvisor({ form, question, feedback }: AdvisorPayloa
       question,
       ...(feedback ?? {}),
     },
+    provider,
   };
 
   const response = await fetch('/api/llm', {

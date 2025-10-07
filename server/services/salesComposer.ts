@@ -1,5 +1,13 @@
 import { salesRules } from '../../src/state/salesRules';
 
+type Provider = 'grok' | 'openai';
+
+type GrokResponse = {
+  choices?: Array<{ message?: { content?: string } }>;
+};
+
+type OpenAIResponse = GrokResponse;
+
 const fallbackResponse = {
   variants: [
     'Basic package: Covers core areas efficiently.',
@@ -8,9 +16,74 @@ const fallbackResponse = {
   closing: 'This solution ensures optimal insulation—ready to proceed?'
 };
 
-const XAI_API_KEY = process.env.XAI_API_KEY || '***REMOVED***';
+const DEFAULT_GROK_KEY = '***REMOVED***';
+const GROK_API_KEY = process.env.GROK_API_KEY || process.env.XAI_API_KEY || DEFAULT_GROK_KEY;
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
 const GROK_MODEL = 'grok-4-latest';
 const TEMPERATURE = 0.7;
+
+export async function composeSales(
+  form: unknown = {},
+  feedback: unknown = {},
+  preferredProvider: Provider = 'grok'
+) {
+  const messages = [
+    {
+      role: 'system' as const,
+      content: `You are crafting persuasive sales copy for YetiFoam using these rules: ${JSON.stringify(salesRules)}. Produce 2-3 concise variants and a compelling closing statement.`
+    },
+    {
+      role: 'user' as const,
+      content: `Shed configuration: ${JSON.stringify(form || {})}\nFeedback: ${JSON.stringify(feedback || {})}\nReturn JSON only (no markdown fences) shaped as { "variants": ["Variant 1"], "closing": "Close" }.\nEach variants entry must be a plain string without embedded JSON or objects.\nThe closing must be a single plain string.`
+    }
+  ];
+
+  const providers: Provider[] = preferredProvider === 'openai' ? ['openai', 'grok'] : ['grok', 'openai'];
+  const hasAnyProvider = Boolean(GROK_API_KEY) || Boolean(OPENAI_API_KEY);
+
+  if (!hasAnyProvider) {
+    console.warn('composeSales: no LLM provider configured; returning fallback response.');
+    return fallbackResponse;
+  }
+
+  for (const provider of providers) {
+    try {
+      if (provider === 'grok') {
+        if (!GROK_API_KEY) continue;
+        const completion = await callGrok(messages);
+        const responseContent = completion.choices?.[0]?.message?.content ?? '';
+        const parsed = parseResponse(responseContent);
+        if (!parsed) throw new Error('Invalid Grok response payload');
+        return buildResult(parsed);
+      }
+
+      if (provider === 'openai') {
+        if (!OPENAI_API_KEY) continue;
+        const completion = await callOpenAI(messages);
+        const responseContent = completion.choices?.[0]?.message?.content ?? '';
+        const parsed = parseResponse(responseContent);
+        if (!parsed) throw new Error('Invalid OpenAI response payload');
+        return buildResult(parsed);
+      }
+    } catch (error) {
+      console.error(`composeSales ${provider} error:`, error);
+    }
+  }
+
+  return fallbackResponse;
+}
+
+export default composeSales;
+
+function buildResult(parsed: any) {
+  const variants = toVariantArray(parsed?.variants);
+  const closing = toStringValue(parsed?.closing) ?? fallbackResponse.closing;
+  return {
+    variants: variants.length > 0 ? variants : fallbackResponse.variants,
+    closing,
+  };
+}
 
 function stripCodeFence(raw: string): string {
   let text = raw.trim();
@@ -75,46 +148,12 @@ function toVariantArray(value: unknown): string[] {
   return variants.length > 0 ? variants : fallbackResponse.variants;
 }
 
-export async function composeSales(form: unknown = {}, feedback: unknown = {}) {
-  if (!XAI_API_KEY) {
-    console.warn('composeSales fallback: XAI_API_KEY not set');
-    return fallbackResponse;
-  }
-
-  const messages = [
-    {
-      role: 'system' as const,
-      content: `You are crafting persuasive sales copy for YetiFoam using these rules: ${JSON.stringify(salesRules)}. Produce 2-3 concise variants and a compelling closing statement.`
-    },
-    {
-      role: 'user' as const,
-      content: `Shed configuration: ${JSON.stringify(form || {})}\nFeedback: ${JSON.stringify(feedback || {})}\nReturn JSON only (no markdown fences) shaped as { "variants": ["Variant 1"], "closing": "Close" }.\nEach variants entry must be a plain string without embedded JSON or objects.\nThe closing must be a single plain string.`
-    }
-  ];
-
-  try {
-    const completion = await callGrok(messages);
-    const responseContent = completion.choices?.[0]?.message?.content ?? null;
-    const parsed = parseResponse(responseContent);
-    if (!parsed) {
-      throw new Error('Invalid response payload');
-    }
-
-    const variants = toVariantArray(parsed?.variants);
-    const closing = toStringValue(parsed?.closing) ?? fallbackResponse.closing;
-    return { variants, closing };
-  } catch (error) {
-    console.error('Grok composeSales error:', error);
-    return fallbackResponse;
-  }
-}
-
-async function callGrok(messages: Array<{ role: string; content: string }>) {
+async function callGrok(messages: Array<{ role: string; content: string }>): Promise<GrokResponse> {
   const response = await fetch('https://api.x.ai/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${XAI_API_KEY}`,
+      Authorization: `Bearer ${GROK_API_KEY}`,
     },
     body: JSON.stringify({
       model: GROK_MODEL,
@@ -132,4 +171,25 @@ async function callGrok(messages: Array<{ role: string; content: string }>) {
   return response.json();
 }
 
-export default composeSales;
+async function callOpenAI(messages: Array<{ role: string; content: string }>): Promise<OpenAIResponse> {
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${OPENAI_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: OPENAI_MODEL,
+      temperature: TEMPERATURE,
+      stream: false,
+      messages,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.text();
+    throw new Error(`OpenAI request failed: ${response.status} ${errorBody}`);
+  }
+
+  return response.json();
+}
