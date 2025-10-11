@@ -81,7 +81,7 @@ This specification captures the behaviour and architecture of the current YetiFo
 - When ready: render `ConfigSummary`, `TotalsSummary`, `BreakdownTable` in order. Environmental snapshot removed.
 - Toolbar currently contains “Edit inputs” button to restore input focus and panel proportions.
 
--## 6. Export Panel (`src/components/export/ExportPanel.tsx`)
+## 6. Export Panel (`src/components/export/ExportPanel.tsx`)
 - Notes textarea (not persisted).
 - Quote summary and email draft presented as read-only textareas for manual copy.
 - "Download PDF" button invokes jsPDF to generate an A4 document containing the quote summary, optional notes, advisor variants, and closing language (defaults apply when no advisor history exists).
@@ -94,10 +94,10 @@ This specification captures the behaviour and architecture of the current YetiFo
 - UI renders the variants as bullet points with a closing paragraph and persists the last 10 entries (plus selected provider) in `advisor.history`.
 - When both providers (or validation) fail, the panel surfaces the static fallback variants (`Standard foam…`, `Premium option…`) and the closing "Let's discuss the best fit for your shed."
 
-### 7.2 Sales Composer (`src/components/sales/SalesPanel.tsx`)
-- Reuses the same validated form payload, allowing optional customer notes and internal feedback that travel via the `feedback` field.
-- Posts `{ form, feedback, provider }` to `/api/sales` and renders the resulting variants/closing, mirroring the advisor fallback behaviour across Grok/OpenAI.
-- Legacy scenario detection, snippet selection, and feedback storage modules remain available for future expansions but are not part of the launch-critical flow.
+### 7.2 Sales Composer (UI deferred)
+- The previous client-side panel and supporting local stores were removed during the Q1 cleanup; no customer-facing sales composer UI ships today.
+- The server endpoint (`/api/sales`) and client service helper (`src/services/salesComposer.ts`) remain available for future reintegration once the panel returns.
+- Reintroducing the panel will require refreshed UX, prompt plumbing, and persistence rules aligned with the trimmed layout state.
 
 ### 7.3 Server Services (`server/services/llmPlanner.ts`, `server/services/salesComposer.ts`)
 - Both services construct chat requests from the incoming form/feedback, hitting Grok (`grok-4-latest`, temperature 0.7) first and cascading to OpenAI (`gpt-4o-mini` by default) when needed.
@@ -105,8 +105,8 @@ This specification captures the behaviour and architecture of the current YetiFo
 - Default fallbacks: variants revert to the two-line static copy noted above, and closings fall back to "Let's discuss the best fit for your shed." on failure.
 
 ### 7.4 Sales Data Files
-- `src/data/salesKB/*.json` and related stores remain as reference data for future rule engines but are currently unused in the launch path.
-- Templates (`src/data/salesTemplates.json`) stay generic with no location placeholders until richer composer logic returns.
+- `src/data/salesKB/*.json` and `src/data/salesTemplates.json` remain checked in as reference material for future rule engines but are not consumed by the current runtime.
+- Keep the files updated outside the main bundle to avoid bloating the deployed client until the sales composer is reinstated.
 
 ### 7.5 CRM Export Hook (`src/components/export/ExportPanel.tsx`)
 - Uses jsPDF to generate a downloadable PDF containing the quote summary and the latest advisor variants/closing.
@@ -115,7 +115,7 @@ This specification captures the behaviour and architecture of the current YetiFo
 ## 8. Persistence & Storage
 - `usePersistentState` handles serialization with runtime schema validation in development.
 - Stored shape includes: `sections`, `panelSizes`, `advisor.history`, `form`, `results`, `mode`.
-- Migrations handled by `src/state/persistence.ts` for legacy shapes (now without `Location`).
+- No standalone migration helper remains after the cleanup; backward compatibility is enforced by the `ensure*` guards inside `LayoutContext`.
 
 ## 9. API Contracts
 ### 9.1 POST /api/llm

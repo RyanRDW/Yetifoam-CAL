@@ -12,6 +12,7 @@ export interface LogEntry {
   snippets_used: string[];
   feedback_used: boolean;
   feedback_ids: string[];
+  weather_used: boolean;
   output_preview: string;
 }
 

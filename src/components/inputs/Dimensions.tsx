@@ -4,7 +4,7 @@ import { suggestPitch } from '../../state/formSchema';
 
 type DimensionKey = 'length' | 'width' | 'height';
 
-const DIMENSION_LIMITS: Record<DimensionKey, { label: string; max: number; image: string; helper: string } > = {
+const DIMENSION_LIMITS: Record<DimensionKey, { label: string; max: number; image: string; helper: string }> = {
   length: {
     label: 'Length (m)',
     max: 50,
@@ -31,11 +31,8 @@ export function Dimensions() {
     updateForm,
   } = useLayout();
 
-  const [touched, setTouched] = useState<Record<DimensionKey, boolean>>({
-    length: false,
-    width: false,
-    height: false,
-  });
+  const [touched, setTouched] = useState<Record<DimensionKey, boolean>>({ length: false, width: false, height: false });
+  const [imageFailed, setImageFailed] = useState<Record<DimensionKey, boolean>>({ length: false, width: false, height: false });
 
   const errors = useMemo(() => {
     const next: Partial<Record<DimensionKey, string | null>> = {};
@@ -93,7 +90,7 @@ export function Dimensions() {
         const error = errors[key];
         return (
           <div key={key} className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-slate-700" htmlFor={`dimension-${key}`}>
+            <label className="text-base font-semibold text-slate-900" htmlFor={`dimension-${key}`}>
               {config.label}
             </label>
             <input
@@ -113,9 +110,21 @@ export function Dimensions() {
                 .join(' ')}
               placeholder={`0 – ${config.max}`}
             />
-            <figure className="flex flex-col gap-1 rounded-md border border-dashed border-slate-300 bg-slate-50 p-3 text-xs text-slate-500">
-              <figcaption className="font-semibold text-slate-600">{config.image}</figcaption>
-              <p>{config.helper}</p>
+            <figure className="flex flex-col gap-2 rounded-md border border-dashed border-slate-300 bg-slate-50 p-3 text-xs text-slate-500">
+              <div className="flex h-32 items-center justify-center overflow-hidden rounded-md bg-white/60">
+                {!imageFailed[key] ? (
+                  <img
+                    src={`/images/${config.image}`}
+                    alt={config.label}
+                    loading="lazy"
+                    className="h-full w-full object-cover"
+                    onError={() => setImageFailed((prev) => ({ ...prev, [key]: true }))}
+                  />
+                ) : (
+                  <span className="px-3 text-center text-[11px] text-slate-500">Illustration unavailable ({config.image})</span>
+                )}
+              </div>
+              <p className="text-[11px] font-semibold text-slate-600">{config.helper}</p>
             </figure>
             {error && <p className="text-xs text-red-600">{error}</p>}
           </div>

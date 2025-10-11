@@ -23,8 +23,7 @@ export async function chat({
       ...(system ? [{ role: "system", content: system } as ChatMessage] : []),
       ...messages
     ],
-    max_tokens: maxTokens ?? 300,
-    temperature: 0.2
+    max_completion_tokens: maxTokens ?? 300
   });
 
   return resp.choices?.[0]?.message?.content ?? "";

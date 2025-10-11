@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 
 interface ImageTileProps {
   label: string;
@@ -21,6 +21,8 @@ export function ImageTile({
   footer,
   disabled = false,
 }: ImageTileProps) {
+  const [imageFailed, setImageFailed] = useState(false);
+
   return (
     <button
       type="button"
@@ -37,8 +39,18 @@ export function ImageTile({
       onClick={disabled ? undefined : onClick}
       disabled={disabled}
     >
-      <div className="relative flex h-32 items-center justify-center bg-slate-100/80 text-xs font-medium text-slate-500">
-        <span>{imageFile}</span>
+      <div className="relative flex h-32 items-center justify-center overflow-hidden bg-slate-100/80 text-xs font-medium text-slate-500">
+        {!imageFailed ? (
+          <img
+            src={`/images/${imageFile}`}
+            alt={label}
+            loading="lazy"
+            className="h-full w-full object-cover"
+            onError={() => setImageFailed(true)}
+          />
+        ) : (
+          <span className="px-3 text-center text-[11px] text-slate-500">Preview unavailable ({imageFile})</span>
+        )}
         {badge && (
           <span className="absolute right-2 top-2 rounded-full bg-amber-500/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
             {badge}
