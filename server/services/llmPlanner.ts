@@ -16,8 +16,7 @@ const fallbackResponse = {
   closing: "Let's discuss the best fit for your shed."
 };
 
-const DEFAULT_GROK_KEY = '***REMOVED***';
-const GROK_API_KEY = process.env.GROK_API_KEY || process.env.XAI_API_KEY || DEFAULT_GROK_KEY;
+const GROK_API_KEY = process.env.GROK_API_KEY || process.env.XAI_API_KEY ;
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
 const GROK_MODEL = 'grok-4-latest';
