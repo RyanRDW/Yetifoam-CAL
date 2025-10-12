@@ -129,7 +129,9 @@ npm run preview
 
 ### AI Sales Assistant
 
-The AI Sales Assistant helps generate customized talking points for customer conversations. The OpenAI API key is hardcoded in the application - no setup required!
+The AI Sales Assistant helps generate customized talking points for customer conversations using OpenAI GPT-4o-mini with a comprehensive Yetifoam knowledge base.
+
+📘 **[Complete AI System Documentation](./AI_SYSTEM_GUIDE.md)** - See detailed guide for editing AI behavior, adding presets, and system architecture.
 
 **How to Use**:
 
@@ -176,7 +178,13 @@ The AI uses **GPT-4o-mini** from OpenAI with a comprehensive knowledge base abou
 
 **API Key Configuration**: The OpenAI API key is stored in `.env` as `VITE_OPENAI_API_KEY` and is injected at build time. The key is hardcoded into the application bundle, so no runtime configuration is needed.
 
-**Feedback**: Use the red "Report Calculation Issue + Update Sales Responses" button to submit feedback about calculation accuracy or AI response quality.
+**Feedback System**: Use the red **"Report Calculation Issue + Update Sales Responses"** button at the top of the AI panel to submit feedback about calculation accuracy or AI response quality. Feedback is currently logged to console (placeholder for backend integration).
+
+**Editing the AI System**:
+- **Add/Remove Preset Topics:** Edit [src/features/ai/AIPanel.tsx](src/features/ai/AIPanel.tsx) lines 33-51
+- **Change AI Knowledge Base:** Edit [src/lib/ai.ts](src/lib/ai.ts) lines 56-128 (system prompt)
+- **Change Response Length:** Edit [src/lib/ai.ts](src/lib/ai.ts) line 161 (`max_tokens`)
+- **Full Documentation:** See [AI_SYSTEM_GUIDE.md](./AI_SYSTEM_GUIDE.md)
 
 ## Architecture Decisions
 
