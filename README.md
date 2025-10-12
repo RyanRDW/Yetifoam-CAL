@@ -40,16 +40,22 @@ A modern web application for calculating spray foam insulation requirements for 
 src/
   app/              # Routing, layout shell, providers
   features/
-    calculator/     # Calculator UI and logic
-    ai/             # AI sales assistant panel
+    calculator/     # Calculator UI and logic (CalculatorForm, CalculatorResult)
+    ai/             # AI sales assistant panel (AIPanel)
   components/       # Shared UI components
+    common/         # Reusable components (ImageTile)
+    inputs/         # Form input components (Dimensions, OpeningsDialog)
   lib/              # API clients, utilities, hooks
-  theme/            # Material Design tokens and theme
-  pages/            # Route-level page components
+    ai.ts           # OpenAI integration with Yetifoam knowledge base
+  theme/            # Material Design 3 tokens and theme
+  pages/            # Route-level page components (CalculatorPage)
   state/            # Form schemas and types
-  config/           # Presets and configuration data
+  config/           # Presets and configuration data (presets.json)
 public/
-  images/           # Reference images for calculator
+  images/           # Reference images for calculator (dimensions, pitch, cladding)
+server/
+  llm/              # Server-side LLM integration (Grok API)
+  state/            # Server state management (salesLog)
 ```
 
 ## Getting Started
@@ -246,11 +252,13 @@ Calculation factors and presets are defined in `src/config/presets.json`:
 Create a `.env` file for configuration:
 
 ```env
-VITE_OPENAI_API_KEY=your_openai_key_here  # Hardcoded in build for AI Sales Assistant
-GROK_API_KEY=your_grok_key_here           # Optional, for legacy server features
+VITE_OPENAI_API_KEY=your_openai_key_here  # Required for AI Sales Assistant
+OPENAI_API_KEY=your_openai_key_here       # Required for server-side features
+GROK_API_KEY=your_grok_key_here           # Optional, for Grok API integration
+PORT=8788                                  # Server port (default: 8788)
 ```
 
-> **Note**: The OpenAI API key is hardcoded at build time via `VITE_OPENAI_API_KEY`. The application makes client-side OpenAI API calls directly from the browser.
+> **Note**: `VITE_OPENAI_API_KEY` is injected at build time and enables client-side AI features. The application makes direct OpenAI API calls from the browser for the Sales Assistant.
 
 ## Deployment
 
