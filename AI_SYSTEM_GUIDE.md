@@ -17,7 +17,7 @@
 The AI Sales Assistant is a **client-side OpenAI GPT-4o-mini integration** that generates customized sales talking points for Yetifoam spray foam insulation. It uses a comprehensive knowledge base hardcoded in the system prompt and operates completely from the browser.
 
 ### Key Features:
-- **17 Default Preset Topics** (Condensation, Rust, Anti-con, etc.)
+- **26 Default Preset Topics** (Condensation, Rust, Anti-con, Dust Degradation, Structural Benefits, Air Sealing, Thermal Bridging, Total Cost of Ownership, Space Loss, Manufacturer Fraud, Victoria Climate Specific, Environmental Impact, etc.)
 - **Custom Topic Creation** (users can add their own topics)
 - **Multi-Select** (select multiple topics, AI addresses ALL comprehensively)
 - **Comprehensive Responses** (3-5 statements per topic)
@@ -121,9 +121,9 @@ src/pages/CalculatorPage.tsx (displays AIPanel on page)
 
 ## Preset Topic Buttons
 
-### Default Presets (17 Total)
+### Default Presets (26 Total)
 
-**Location:** [src/features/ai/AIPanel.tsx:33-51](src/features/ai/AIPanel.tsx#L33-L51)
+**Location:** [src/features/ai/AIPanel.tsx:33-60](src/features/ai/AIPanel.tsx#L33-L60)
 
 ```typescript
 const DEFAULT_PRESETS = [
@@ -144,6 +144,15 @@ const DEFAULT_PRESETS = [
   'Air Barrier',       // Air sealing benefit
   'Leaking',           // Leak prevention
   'Noisy',             // Sound insulation
+  'Dust Degradation',  // New: Dust impact on competitors
+  'Structural Benefits', // New: Strength enhancements
+  'Air Sealing / Air Leakage', // New: Leak reduction
+  'Thermal Bridging',  // New: Bridging losses
+  'Total Cost of Ownership', // New: Long-term costs
+  'Space Loss',        // New: Space reduction from competitors
+  'Manufacturer Fraud / Deception', // New: Misleading claims
+  'Victoria Climate Specific', // New: Vic-specific benefits
+  'Environmental Impact' // New: Eco aspects
 ];
 ```
 
@@ -307,6 +316,47 @@ const handleFeedbackSubmit = async () => {
 ```typescript
 **EXAMPLE for "Anti-con" topic**:
 "Your new example response here..."  // ← Replace entire example
+```
+
+#### Add New Sales Lines for Existing Topics:
+
+For topics like **Dust Degradation**, **Structural Benefits**, **Air Sealing**, **Thermal Bridging**, etc., add specific talking points to the relevant sections:
+
+```typescript
+// Example: Adding Dust Degradation sales lines to COMPETITOR FLAWS section
+
+**REFLECTIVE FOIL/AIRCELL/ANTI-CON**:
+- Dust kills reflective foil: 40-70% performance loss in 2-3 years—cleaning impossible.
+- Year 1: 25-35% loss; year 5: <30% remains—turns cheap products worthless.
+- Manufacturers admit R-value drops with dust—impossible to keep clean in sheds.
+- Dust kills foil: 26-47% cooling year 1, below 30% by year 3-5 as surface dulls.
+```
+
+```typescript
+// Example: Adding Structural Benefits to KEY YETIFOAM BENEFITS section
+
+**KEY YETIFOAM BENEFITS**:
+- Yetifoam boosts wind uplift 300%, racking strength 124-191%—bonds structure per AS 4100.
+- Eliminates thermal shock damage—no competitor provides structural gain.
+- Increases overall stability—quantified, unique advantage.
+```
+
+```typescript
+// Example: Adding Air Sealing / Air Leakage to KEY YETIFOAM BENEFITS section
+
+**KEY YETIFOAM BENEFITS**:
+- Air infiltration 58% winter loss—Yetifoam reduces 83%, cutting heating 40%.
+- Seamless barrier stops drafts entirely.
+- Yetifoam seals 83% air leaks—stops 58% winter heat loss.
+```
+
+```typescript
+// Example: Adding Thermal Bridging to KEY YETIFOAM BENEFITS section
+
+**KEY YETIFOAM BENEFITS**:
+- Bridging eliminates up to 40% efficiency in metal sheds—steel conducts 1,250x faster.
+- Yetifoam continuous coverage stops it—competitors omit in claims, losing 23-36%.
+- Fasteners alone cause 1.5-31.5% loss—ignored by alternatives.
 ```
 
 ### 2. **Change Response Length**

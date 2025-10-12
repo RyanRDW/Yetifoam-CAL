@@ -13,11 +13,13 @@ A modern web application for calculating spray foam insulation requirements for 
 - **Compact Configuration Section**: Cladding, Members, Spray Options, and Openings all in one organized section
 - **Opening Management**: Track doors, windows, and other openings to accurately deduct from spray area
 - **AI Sales Assistant**: Generate comprehensive sales talking points using OpenAI GPT-4o-mini with hardcoded API key
-  - **17 Preset Topics**: Quick access to common customer concerns (Condensation, Rust, Too Expensive, Anti-con, Reflective Foil, etc.)
+  - **26 Preset Topics**: Quick access to common customer concerns including:
+    - Original 17: Condensation, Rust, Roof Only, Reflective Foil, Foil Board, Summer Heat, Winter Cold, Anti-con, Too Expensive, Can DIY, Fire, Air-Cell, Batt Walls, Vapour Barrier, Air Barrier, Leaking, Noisy
+    - New 9: Dust Degradation, Structural Benefits, Air Sealing / Air Leakage, Thermal Bridging, Total Cost of Ownership, Space Loss, Manufacturer Fraud / Deception, Victoria Climate Specific, Environmental Impact
   - **Custom Topics**: Create your own topic buttons for frequently discussed subjects
   - **Multi-Select**: Select multiple topics simultaneously - AI addresses EACH topic comprehensively
   - **Comprehensive Responses**: AI provides 3-5 statements per topic covering benefits, competitor flaws, costs, and technical facts
-  - **Yetifoam Knowledge Base**: AI trained on extensive product data, competitor comparisons (Anti-con, Foilboard, Fibreglass), and TCO analysis
+  - **Yetifoam Knowledge Base**: AI trained on extensive product data, competitor comparisons (Anti-con, Foilboard, Fibreglass), TCO analysis, and climate-specific insights
   - **Clean Conversational Responses**: No sales fluff, no headings - just direct statements salespeople can say to customers
   - **1500 token responses**: Long enough to address multiple topics thoroughly
 - **Compact Results Display**: Configuration summary, Total Spray Area, and Area Breakdown all in one card (3-column layout)
@@ -148,12 +150,20 @@ The AI Sales Assistant helps generate customized talking points for customer con
    - Each topic gets 3-5 relevant statements
 
 **Knowledge Base Includes**:
-- **Yetifoam Benefits**: Structural strength (300% wind uplift, 124-200% racking), condensation elimination (100%), thermal bridging elimination, air leakage reduction (83%), zero degradation (25+ years), Class 1 vapour barrier, pest prevention
+- **Yetifoam Benefits**: Structural strength (300% wind uplift, 124-200% racking), condensation elimination (100%), thermal bridging elimination, air leakage reduction (83%), zero degradation (25+ years), 97.6% leak-free over 26 years, Class 1 vapour barrier, pest prevention, seamless waterproofing, no space loss
 - **Competitor Product Flaws**:
-  - **Anti-con/Reflective Foil/Aircell**: Requires roof removal (voids warranty), degrades in 5 years (dust), 0-13% winter benefit, NOT a vapour barrier, still allows condensation
-  - **Fibreglass Batt Walls**: $47k vs Yetifoam $16k, loses 150-200mm space, 40-60% R-value loss from compression, degrades to 31-38% by year 5, NOT a vapour barrier
-  - **Foilboard**: Requires demolition, $18k (13% more), degrades in 5 years, gaps allow condensation
-- **Total Cost of Ownership**: 10-year TCO Yetifoam $25,750 vs Fibreglass $60,350
+  - **Anti-con/Reflective Foil/Aircell**: Requires roof removal (voids warranty), degrades in 5 years (dust), 0-13% winter benefit, NOT a vapour barrier, still allows condensation, dust kills performance (40-70% loss in 2-3 years), creates rust conditions
+  - **Fibreglass Batt Walls**: $47k vs Yetifoam $16k, loses 150-200mm space, 40-60% R-value loss from compression, degrades to 31-38% by year 5, NOT a vapour barrier, hidden rust behind walls, wet fibreglass loses 60% R-value
+  - **Foilboard**: Requires demolition, $18k (13% more), degrades in 5 years, gaps allow condensation, thermal bridging through fasteners (23-36% efficiency loss)
+- **Dust Degradation**: Detailed data on how dust kills reflective products (26-47% cooling year 1, below 30% by year 3-5), manufacturers admit R-value drops
+- **Structural Benefits**: Quantified strength improvements (300% wind uplift, 124-191% racking), AS 4100 compliance, fire stability
+- **Air Sealing**: 58% winter heat loss from air infiltration, Yetifoam reduces 83%, seamless barrier stops drafts
+- **Thermal Bridging**: Steel conducts 1,250x faster than insulation, bridging eliminates up to 40% efficiency, fasteners alone cause 1.5-31.5% loss
+- **Total Cost of Ownership**: 10-year TCO Yetifoam $25,750 (LOWEST) vs Fibreglass $60,350 (+$50,600), competitors degrade needing replacement
+- **Space Loss**: Competitors require battens/linings stealing 150-200mm (5% shed loss), Yetifoam retains 100% space
+- **Manufacturer Fraud**: Competitors provide only lab R-values (omit bridging, degradation), conditional claims like "when sealed" never achieved, no maintenance disclosure
+- **Victoria Climate**: Melbourne 6:1 heating-to-cooling ratio, dew-point reality (metal drops to 4-8°C in winter), rural dust accelerates foil degradation
+- **Environmental Impact**: Yetifoam lowest carbon footprint, zero VOCs, outperforms fibreglass in energy savings
 - **Customer Education**: What customers don't know about insulation products
 
 **How the AI Works**:

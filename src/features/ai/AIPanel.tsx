@@ -31,23 +31,32 @@ interface AIPanelProps {
 }
 
 const DEFAULT_PRESETS = [
-  'Condensation',
-  'Rust',
-  'Roof Only',
-  'Reflective Foil',
-  'Foil Board',
-  'Summer Heat',
-  'Winter Cold',
-  'Anti-con',
-  'Too Expensive',
-  'Can DIY',
-  'Fire',
-  'Air-Cell',
-  'Batt Walls',
-  'Vapour Barrier',
-  'Air Barrier',
-  'Leaking',
-  'Noisy',
+  'Condensation',      // Moisture issues
+  'Rust',              // Metal corrosion from condensation
+  'Roof Only',         // Just spray roof vs walls too
+  'Reflective Foil',   // Competitor product
+  'Foil Board',        // Competitor product
+  'Summer Heat',       // Cooling benefits
+  'Winter Cold',       // Heating benefits
+  'Anti-con',          // Main competitor product
+  'Too Expensive',     // Price objection
+  'Can DIY',           // DIY misconception
+  'Fire',              // Fire safety
+  'Air-Cell',          // Competitor product
+  'Batt Walls',        // Fibreglass competitor
+  'Vapour Barrier',    // Technical benefit
+  'Air Barrier',       // Air sealing benefit
+  'Leaking',           // Leak prevention
+  'Noisy',             // Sound insulation
+  'Dust Degradation',  // New: Dust impact on competitors
+  'Structural Benefits', // New: Strength enhancements
+  'Air Sealing / Air Leakage', // New: Leak reduction
+  'Thermal Bridging',  // New: Bridging losses
+  'Total Cost of Ownership', // New: Long-term costs
+  'Space Loss',        // New: Space reduction from competitors
+  'Manufacturer Fraud / Deception', // New: Misleading claims
+  'Victoria Climate Specific', // New: Vic-specific benefits
+  'Environmental Impact' // New: Eco aspects
 ];
 
 export default function AIPanel({ context }: AIPanelProps) {
