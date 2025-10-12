@@ -1,0 +1,165 @@
+Subject: NEW Yetifoam Calculator V2.0 - Now Live with 26 AI Topics!
+
+Hi Team,
+
+Great news! The Yetifoam Calculator has been upgraded to V2.0 and is now live with powerful new features.
+
+🔗 WEBSITE: https://yetifoam-cal.vercel.app
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📊 WHAT'S NEW IN V2.0
+
+✅ 26 AI Topic Presets (was 17)
+✅ 9 Brand New Topics with Comprehensive Data
+✅ Multi-Topic Selection (address multiple concerns at once)
+✅ Victoria-Specific Climate Insights
+✅ Detailed Cost Comparisons & TCO Analysis
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🆕 NEW TOPICS YOU SHOULD USE
+
+1. DUST DEGRADATION
+   → Use when discussing Anti-con, reflective foil, Aircell
+   → Shows 40-70% performance loss in 2-3 years
+   → Explains why competitors fail
+
+2. STRUCTURAL BENEFITS
+   → Use for wind resistance, building strength
+   → 300% wind uplift, 124-191% racking strength
+   → AS 4100 compliance data
+
+3. AIR SEALING / AIR LEAKAGE
+   → Use for heating costs, winter performance
+   → 58% heat loss from air leakage
+   → Yetifoam reduces 83%
+
+4. THERMAL BRIDGING
+   → Use when discussing R-values, efficiency
+   → Steel conducts 1,250x faster
+   → Up to 40% efficiency loss with competitors
+
+5. TOTAL COST OF OWNERSHIP
+   → Use for price objections
+   → 10-year TCO: Yetifoam $25,750 vs Fibreglass $60,350
+   → Competitors need replacement in 5 years
+
+6. SPACE LOSS
+   → Use when discussing fibreglass walls
+   → Competitors steal 150-200mm (5% of shed)
+   → Yetifoam retains 100% space
+
+7. MANUFACTURER FRAUD / DECEPTION
+   → Use when discussing competitor claims
+   → Lab R-values vs real-world performance
+   → Real sheds: 31-54% of claimed performance
+
+8. VICTORIA CLIMATE SPECIFIC
+   → Use for Melbourne/regional customers
+   → Melbourne 6:1 heating-to-cooling ratio
+   → Metal drops to 4-8°C in winter
+
+9. ENVIRONMENTAL IMPACT
+   → Use for eco-conscious customers
+   → Zero VOCs, lowest carbon footprint
+   → Lifetime performance = no replacement waste
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 HOW TO USE THE AI ASSISTANT
+
+METHOD 1: Single Topic (Quick Questions)
+→ Click one topic chip (turns blue)
+→ Click "Generate Sales Points"
+→ Get 3-5 statements in 1-2 seconds
+
+METHOD 2: Multi-Topic (Complex Conversations)
+→ Click 2-4 topic chips
+→ Click "Generate Sales Points"
+→ Get 6-20 statements addressing ALL topics
+→ Saves time, comprehensive answers
+
+METHOD 3: Custom Questions
+→ Type specific customer situation in text box
+→ (Optional) Also select relevant topics
+→ Click "Generate Sales Points"
+→ AI combines knowledge with your context
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💡 QUICK EXAMPLES
+
+Customer: "Anti-con is cheaper and I can install it myself"
+→ Select: Anti-con, Too Expensive, Can DIY, Total Cost of Ownership
+→ Generate → Use the statements
+
+Customer: "What about reflective foil?"
+→ Select: Reflective Foil, Dust Degradation, Manufacturer Fraud
+→ Generate → Use the statements
+
+Customer: "Why is it so expensive vs fibreglass?"
+→ Select: Batt Walls, Too Expensive, Total Cost of Ownership, Space Loss
+→ Generate → Use the statements
+
+Customer: "I only want to spray the roof"
+→ Select: Roof Only, Condensation, Thermal Bridging, Air Sealing
+→ Generate → Use the statements
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ BEST PRACTICES
+
+DO:
+✓ Select 2-4 topics for comprehensive responses
+✓ Use the new topics - they have powerful data
+✓ Use "Total Cost of Ownership" for price objections
+✓ Use "Dust Degradation" when discussing competitors
+✓ Use "Victoria Climate Specific" for Melbourne customers
+✓ Say the generated statements verbatim (they're conversational)
+
+DON'T:
+✗ Select more than 5 topics (response gets too long)
+✗ Ignore the new topics
+✗ Forget to click "Generate" after selecting topics
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📚 FULL USER GUIDE
+
+For detailed instructions, examples, and troubleshooting:
+https://yetifoam-cal.vercel.app (see documentation folder)
+
+Or ask for the STAFF_USER_GUIDE.md file
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎓 PRACTICE NOW
+
+1. Go to: https://yetifoam-cal.vercel.app
+2. Try this: 12m × 8m × 3m, 15° pitch, Corrugated
+3. Select AI topics: Anti-con, Dust Degradation, Total Cost of Ownership
+4. Click Generate
+5. Read the comprehensive response!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❓ QUESTIONS?
+
+Technical issues: Contact IT
+Sales questions: Ask your manager or use the AI Assistant
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🚀 START USING IT TODAY!
+
+Website: https://yetifoam-cal.vercel.app
+
+This tool will help you:
+✓ Calculate spray areas faster
+✓ Answer customer objections confidently
+✓ Provide specific data points (not vague claims)
+✓ Close more sales with comprehensive information
+
+Thanks,
+[Your Name]
